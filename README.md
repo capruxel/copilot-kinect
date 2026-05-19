@@ -64,14 +64,16 @@ $env:POWER_AUTOMATE_UPLOAD_URL="https://..."
 
 ## 模型權重
 
-YOLO 權重請放在 `models/yolo/`。預期檔名如下：
+YOLO 權重請放在 `models/yolo/`。目前主要使用：
 
 ```text
 models/yolo/yolo26x-pose.pt
-models/yolo/yolo26l-pose.pt
-models/yolo/yolo26m-pose.pt
-models/yolo/yolo26s-pose.pt
-models/yolo/yolo26n-pose.pt
+```
+
+如果要用其他 pose 模型，可以透過環境變數指定：
+
+```powershell
+$env:YOLO_POSE_MODEL="models/yolo/your-model.pt"
 ```
 
 大型模型檔、影片、embedding database、學生臉部資料與本機設定不會進入 Git。請勿把真實學生個資、webhook URL、課堂影片或模型權重直接提交到 GitHub。

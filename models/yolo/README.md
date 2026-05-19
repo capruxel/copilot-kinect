@@ -3,13 +3,13 @@
 Place local YOLO model weights in this folder. The weights are ignored by git
 because they are large runtime artifacts.
 
-Expected filenames:
+Current primary pose model:
 
-- `yolo26x-pose.pt`: primary pose model for the attendance pipeline
-- `yolo26l-pose.pt`: high-accuracy fallback
-- `yolo26m-pose.pt`: balanced fallback
-- `yolo26s-pose.pt`: faster fallback
-- `yolo26n-pose.pt`: lightweight fallback for quick testing
+- `yolo26x-pose.pt`
 
-The app checks this folder before falling back to legacy model paths in the
-project root.
+You can point the attendance pipeline at a different pose model with the
+`YOLO_POSE_MODEL` environment variable, for example:
+
+```powershell
+$env:YOLO_POSE_MODEL="models/yolo/your-model.pt"
+```
