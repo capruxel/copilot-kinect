@@ -1,0 +1,36 @@
+[project]
+name = "copilot-kinect"
+version = "0.1.0"
+description = "Windows-oriented Flask classroom analytics app with Kinect, YOLO, and InsightFace."
+readme = "README.md"
+requires-python = ">=3.10,<3.11"
+dependencies = [
+    "Flask==3.1.3",
+    "requests==2.33.0",
+    "numpy==2.2.6",
+    "pandas==2.3.3",
+    "opencv-python==4.13.0.92",
+    "pillow==12.1.1",
+    "matplotlib==3.10.8",
+    "scikit-learn==1.7.2",
+    "torch==2.11.0+cu126 ; platform_system == 'Windows'",
+    "torchvision==0.26.0+cu126 ; platform_system == 'Windows'",
+    "ultralytics==8.4.31",
+    "onnxruntime-gpu==1.23.2 ; platform_system == 'Windows'",
+    "insightface==0.7.3",
+    "comtypes==1.4.16 ; platform_system == 'Windows'",
+    "pykinect2 ; platform_system == 'Windows'",
+]
+
+[tool.uv]
+package = false
+
+[tool.uv.sources]
+torch = [{ index = "pytorch-cu126", marker = "platform_system == 'Windows'" }]
+torchvision = [{ index = "pytorch-cu126", marker = "platform_system == 'Windows'" }]
+pykinect2 = { git = "https://github.com/Kinect/PyKinect2.git", rev = "c86d575175edf5fc0834590acdfb82b55b5ccd96" }
+
+[[tool.uv.index]]
+name = "pytorch-cu126"
+url = "https://download.pytorch.org/whl/cu126"
+explicit = true
