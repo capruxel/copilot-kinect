@@ -26,21 +26,23 @@ This project targets:
 Create and install the environment from the repository root:
 
 ```powershell
-python -m venv .venv
-.\.venv\Scripts\python.exe -m pip install --upgrade pip
-.\.venv\Scripts\python.exe -m pip install -r requirements.txt
+uv python install 3.10
+uv sync
 ```
 
-`requirements.txt` includes CUDA 12.6 PyTorch wheels, `ultralytics`,
-`onnxruntime-gpu`, `insightface`, `comtypes`, and `pykinect2` from GitHub.
-Dependency installs may need network access and can take time.
+The project uses `pyproject.toml` and `uv.lock` as the source of truth for
+dependencies. `uv` creates a project-local `.venv/`, which matches the current
+Kinect DLL lookup behavior. The dependency set includes CUDA 12.6 PyTorch
+wheels, `ultralytics`, `onnxruntime-gpu`, `insightface`, `comtypes`, and
+`pykinect2` from GitHub. Dependency installs may need network access and can
+take time.
 
 ## Common Commands
 
 Run the Flask app:
 
 ```powershell
-.\.venv\Scripts\python.exe app.py
+uv run python app.py
 ```
 
 Open:
@@ -53,25 +55,25 @@ http://127.0.0.1:5000/dashboard
 Run tests:
 
 ```powershell
-.\.venv\Scripts\python.exe -m unittest discover tests
+uv run python -m unittest discover tests
 ```
 
 Rebuild face embeddings:
 
 ```powershell
-.\.venv\Scripts\python.exe scripts\rebuild_face_db.py
+uv run python scripts\rebuild_face_db.py
 ```
 
 Check GPU / ONNX runtime:
 
 ```powershell
-.\.venv\Scripts\python.exe scripts\check_gpu_runtime.py
+uv run python scripts\check_gpu_runtime.py
 ```
 
 Run K-means analysis:
 
 ```powershell
-.\.venv\Scripts\python.exe clustering\k_means.py
+uv run python clustering\k_means.py
 ```
 
 ## Runtime Data And Secrets
