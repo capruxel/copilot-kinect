@@ -17,7 +17,7 @@ dependencies = [
     "torchvision==0.26.0+cu126 ; platform_system == 'Windows'",
     "ultralytics==8.4.31",
     "onnxruntime-gpu==1.23.2 ; platform_system == 'Windows'",
-    "insightface==0.7.3",
+    "insightface==1.0.1",
     "comtypes==1.4.16 ; platform_system == 'Windows'",
     "pykinect2 ; platform_system == 'Windows'",
 ]
