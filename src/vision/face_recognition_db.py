@@ -16,7 +16,6 @@ class FaceRecognitionDB:
         self._app = None
         self._app_error = None
         self._app_providers = []
-        self._app_ctx_id = None
         self._app_load_lock = threading.Lock()
         self._lock = threading.Lock()
         self._embedding_cache = []
@@ -47,24 +46,11 @@ class FaceRecognitionDB:
         if 'CPUExecutionProvider' not in providers:
             providers.append('CPUExecutionProvider')
 
-        raw_ctx_id = str(os.getenv('INSIGHTFACE_CTX_ID', 'auto')).strip().lower()
-        if raw_ctx_id in {'', 'auto'}:
-            ctx_id = 0 if 'CUDAExecutionProvider' in providers else -1
-        else:
-            try:
-                ctx_id = int(raw_ctx_id)
-            except Exception:
-                ctx_id = -1
-
-        if ctx_id >= 0 and 'CUDAExecutionProvider' not in providers:
-            ctx_id = -1
-
-        return providers, ctx_id
+        return providers
 
     def get_analysis_runtime_info(self):
         return {
             'providers': list(self._app_providers),
-            'ctx_id': self._app_ctx_id,
             'ready': self._app is not None,
         }
 
@@ -190,12 +176,11 @@ class FaceRecognitionDB:
                 self._app_error = f'InsightFace is not available: {exc}'
                 raise RuntimeError(self._app_error) from exc
 
-            providers, ctx_id = self._resolve_insightface_runtime()
-            app = FaceAnalysis(providers=providers)
-            app.prepare(ctx_id=ctx_id)
+            providers = self._resolve_insightface_runtime()
+            app = FaceAnalysis(name='buffalo_l', providers=providers)
+            app.prepare()
             self._app = app
             self._app_providers = providers
-            self._app_ctx_id = ctx_id
             return app
 
     def is_analysis_ready(self):
