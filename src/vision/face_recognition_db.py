@@ -177,8 +177,8 @@ class FaceRecognitionDB:
                 raise RuntimeError(self._app_error) from exc
 
             providers = self._resolve_insightface_runtime()
-            app = FaceAnalysis(name='buffalo_l', providers=providers)
-            app.prepare(ctx_id=-1)
+            app = FaceAnalysis(name='buffalo_s', providers=providers)
+            app.prepare(ctx_id=0)
             self._app = app
             self._app_providers = providers
             return app
