@@ -3,6 +3,11 @@ import os
 import threading
 from pathlib import Path
 
+from src.config import load_config
+
+BASE_DIR = Path(__file__).resolve().parent
+load_config(BASE_DIR / 'config.toml')
+
 import atexit
 import csv
 import math
@@ -18,7 +23,6 @@ from src.vision.kinect_service import KinectService
 from src.vision.attendance_pipeline import RecognitionPipeline
 
 app = Flask(__name__)
-BASE_DIR = Path(__file__).resolve().parent
 USERS_FILE = BASE_DIR / 'data' / 'administrators.json'
 FACE_DB = FaceRecognitionDB(BASE_DIR)
 KINECT_SERVICE = KinectService(BASE_DIR)
