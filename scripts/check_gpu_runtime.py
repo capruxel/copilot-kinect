@@ -2,6 +2,7 @@ import ctypes
 import os
 import subprocess
 import sys
+from pathlib import Path
 
 
 def print_section(title):
@@ -84,8 +85,32 @@ def check_imports():
             print(f'{package_name}: unavailable ({exc})')
 
 
+def check_config():
+    from src.config import get_config_summary  # pylint: disable=import-outside-toplevel
+
+    base_dir = Path(__file__).resolve().parent.parent
+    config_path = base_dir / 'config.toml'
+    summary = get_config_summary(config_path)
+
+    if summary['source'] is None:
+        print('config.toml: not found')
+        return
+
+    print(f'config.toml: {summary["source"]}')
+    if not summary['values']:
+        print('  (no values configured)')
+        return
+
+    for key, value in summary['values'].items():
+        effective = os.getenv(key, value)
+        source = 'config.toml' if os.getenv(key) else 'effective (not in env)'
+        print(f'  {key} = {effective}  ({source})')
+
+
 def main():
     print(f'python: {sys.executable}')
+    print_section('Config')
+    check_config()
     print_section('VC++ Runtime')
     check_vc_runtime()
     print_section('GPU')
