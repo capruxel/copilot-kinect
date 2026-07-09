@@ -1,5 +1,7 @@
 [models]
 # YOLO 姿態模型路徑（相對於專案根目錄或絕對路徑）
+# 路徑請一律使用正斜線 /（Windows 也支援），不可用反斜線 \
+# 反斜線在 TOML 中是跳脫字元，會導致解析錯誤
 pose_model = "models/yolo/yolo26m-pose.pt"
 
 # YOLO 推論裝置：auto / cpu / cuda / cuda:0

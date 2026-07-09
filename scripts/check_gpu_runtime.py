@@ -100,6 +100,11 @@ def check_config():
         print('config.toml: not found')
         return
 
+    error = summary.get('error')
+    if error:
+        print(f'config.toml: parse error - {error}')
+        return
+
     print(f'config.toml: {summary["source"]}')
     if not summary['values']:
         print('  (no values configured)')

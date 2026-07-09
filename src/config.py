@@ -36,8 +36,15 @@ def load_config(config_path):
         print(f"[config] 找不到 {config_path}，使用現有環境變數")
         return
 
-    with open(config_path, "rb") as fh:
-        data = tomllib.load(fh)
+    try:
+        with open(config_path, "rb") as fh:
+            data = tomllib.load(fh)
+    except Exception as exc:
+        print(f"[config] {config_path} 解析失敗: {exc}")
+        if "\\" in str(exc).lower() or "escape" in str(exc).lower():
+            print("[config] TOML 路徑請使用正斜線 / 而非反斜線 \\")
+            print('         例: pose_model = "models/yolo/yolo26m-pose.pt"')
+        return
 
     configured = []
 
@@ -67,7 +74,10 @@ def get_config_summary(config_path):
         return {"source": None, "values": {}}
 
     with open(config_path, "rb") as fh:
-        data = tomllib.load(fh)
+        try:
+            data = tomllib.load(fh)
+        except Exception as exc:
+            return {"source": str(config_path), "values": {}, "error": str(exc)}
 
     values = {}
     for (section, key), env_name in SECTION_KEY_MAP.items():
