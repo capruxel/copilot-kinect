@@ -20,6 +20,7 @@ dependencies = [
     "insightface==1.0.1",
     "comtypes==1.4.16 ; platform_system == 'Windows'",
     "pykinect2 ; platform_system == 'Windows'",
+    "tomli>=2.0,<3",
 ]
 
 [tool.uv]
