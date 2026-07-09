@@ -3,6 +3,7 @@
 libfreenect/
 
 # Local configuration / secrets
+config.toml
 .env
 *.local
 

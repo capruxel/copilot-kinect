@@ -1,0 +1,36 @@
+[models]
+# YOLO 姿態模型路徑（相對於專案根目錄或絕對路徑）
+pose_model = "models/yolo/yolo26m-pose.pt"
+
+# YOLO 推論裝置：auto / cpu / cuda / cuda:0
+# auto = 有 CUDA GPU 就用 GPU，否則用 CPU
+device = "auto"
+
+[insightface]
+# ONNX Runtime 執行提供者，逗號分隔（CPUExecutionProvider 會自動附加）
+# CUDAExecutionProvider = GPU 加速
+# CPUExecutionProvider  = 純 CPU
+providers = "CUDAExecutionProvider"
+
+[kinect]
+# Kinect 硬體後端：auto / kinect_v2 / kinect_v1
+# auto = 先嘗試 v2，失敗再嘗試 v1
+backend = "auto"
+
+# 測試用影片來源（留空 = 使用實體 Kinect）
+# test_video = "reels/recordings/test.mp4"
+# video_loop = true
+
+[webhook]
+# Power Automate 上傳端點（留空則不上傳）
+power_automate_url = ""
+
+# ---------------------------------------------------------------------
+# 你也可以用 [env] 區塊直接覆蓋任何環境變數
+# 底下的 key=value 會在啟動時自動寫入 os.environ（僅在尚未設定時）
+# ---------------------------------------------------------------------
+# [env]
+# YOLO_POSE_MODEL = "models/yolo/yolo26m-pose.pt"
+# YOLO_DEVICE = "cpu"
+# INSIGHTFACE_PROVIDERS = "CPUExecutionProvider"
+# POWER_AUTOMATE_UPLOAD_URL = "https://..."
