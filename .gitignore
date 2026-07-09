@@ -18,6 +18,10 @@ data/presence_records.json
 data/_presence_records_tuning.json
 data/administrators.json
 data/user.json
+
+# Generated test / debug artifacts
+test_*.jpg
+test_*.png
 data/test_videos/
 test.py
 reels/recordings/
