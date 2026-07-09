@@ -22,11 +22,27 @@ class FaceRecognitionDB:
         self._embedding_cache_mtime = None
 
     def _available_onnx_providers(self):
+        self._add_nvidia_redist_bins_to_path()
         try:
             import onnxruntime as ort  # pylint: disable=import-outside-toplevel
             return list(ort.get_available_providers())
         except Exception:
             return []
+
+    @staticmethod
+    def _add_nvidia_redist_bins_to_path():
+        import sysconfig  # pylint: disable=import-outside-toplevel
+        nvidia_root = Path(sysconfig.get_path('purelib')) / 'nvidia'
+        if not nvidia_root.is_dir():
+            return
+        path = os.environ.get('PATH', '')
+        extra = []
+        for item in nvidia_root.iterdir():
+            bin_path = item / 'bin'
+            if bin_path.is_dir() and str(bin_path) not in path:
+                extra.append(str(bin_path))
+        if extra:
+            os.environ['PATH'] = os.pathsep.join(extra) + os.pathsep + path
 
     def _resolve_insightface_runtime(self):
         available = self._available_onnx_providers()
