@@ -1,3 +1,4 @@
+import ctypes
 import os
 import subprocess
 import sys
@@ -5,6 +6,32 @@ import sys
 
 def print_section(title):
     print(f'\n[{title}]')
+
+
+def check_vc_runtime():
+    if sys.platform != 'win32':
+        print('vc++ runtime: skipped (not windows)')
+        return
+
+    missing = []
+    for dll_name in ('vcruntime140.dll', 'msvcp140.dll'):
+        try:
+            ctypes.CDLL(dll_name)
+            print(f'{dll_name}: OK')
+        except OSError:
+            missing.append(dll_name)
+            print(f'{dll_name}: MISSING')
+        except Exception as exc:  # pylint: disable=broad-except
+            print(f'{dll_name}: unknown error ({exc})')
+
+    if missing:
+        print(
+            '\n[!] Visual C++ Redistributable 未安裝或版本不完整。\n'
+            '    PyTorch 需要 VC++ Runtime (2015-2022) 才能載入 c10.dll。\n'
+            '    請從以下連結下載並安裝 x64 版本：\n'
+            '    https://aka.ms/vc14/vc_redist.x64.exe\n'
+            '    安裝後請重新開機。'
+        )
 
 
 def run_nvidia_smi():
@@ -59,6 +86,8 @@ def check_imports():
 
 def main():
     print(f'python: {sys.executable}')
+    print_section('VC++ Runtime')
+    check_vc_runtime()
     print_section('GPU')
     run_nvidia_smi()
     print_section('Torch / YOLO')
