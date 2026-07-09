@@ -248,6 +248,7 @@ class RecognitionPipeline:
         self._yolo_error = None
         self._yolo_device = self._resolve_yolo_device()
         self._lock = threading.RLock()
+        self._frame_lock = threading.Lock()
         self._model_lock = threading.Lock()
         self._wake_event = threading.Event()
         self._font_cache = {}
@@ -733,11 +734,12 @@ class RecognitionPipeline:
                 self._last_face_person_fallback_at = 0.0
                 self._last_person_detect_at = 0.0
                 self._last_render_at = 0.0
-                self._render_seq = 0
                 self._last_source_frame_seq = -1
                 self._last_source_frame_timestamp = 0.0
-                self._annotated_jpeg = None
-                self._annotated_depth_jpeg = None
+                with self._frame_lock:
+                    self._render_seq = 0
+                    self._annotated_jpeg = None
+                    self._annotated_depth_jpeg = None
                 self._distance_smooth_cache = {}
                 self._last_summary_update_at = 0.0
                 self._last_metrics_update_at = 0.0
@@ -782,11 +784,12 @@ class RecognitionPipeline:
                 self._last_face_person_fallback_at = 0.0
                 self._last_person_detect_at = 0.0
                 self._last_render_at = 0.0
-                self._render_seq = 0
                 self._last_source_frame_seq = -1
                 self._last_source_frame_timestamp = 0.0
-                self._annotated_jpeg = None
-                self._annotated_depth_jpeg = None
+                with self._frame_lock:
+                    self._render_seq = 0
+                    self._annotated_jpeg = None
+                    self._annotated_depth_jpeg = None
                 self._distance_smooth_cache = {}
                 self._last_summary_update_at = 0.0
                 self._last_metrics_update_at = 0.0
@@ -836,13 +839,13 @@ class RecognitionPipeline:
             return dict(self._current_course)
 
     def get_latest_color_jpeg(self):
-        with self._lock:
+        with self._frame_lock:
             if not self._attendance_mode and self._annotated_jpeg is None:
                 return self.kinect_service.get_latest_jpeg('color')
             return self._annotated_jpeg or self.kinect_service.get_latest_jpeg('color')
 
     def get_latest_depth_jpeg(self):
-        with self._lock:
+        with self._frame_lock:
             if not self._attendance_mode and self._annotated_depth_jpeg is None:
                 return self.kinect_service.get_latest_jpeg('depth')
             return self._annotated_depth_jpeg or self.kinect_service.get_latest_jpeg('depth')
@@ -1124,7 +1127,7 @@ class RecognitionPipeline:
             time.sleep(0.01)
 
     def _get_stream_payload_and_token(self, kind):
-        with self._lock:
+        with self._frame_lock:
             in_attendance_mode = bool(self._attendance_mode)
             render_seq = int(self._render_seq)
             color_payload = self._annotated_jpeg
@@ -3015,10 +3018,11 @@ class RecognitionPipeline:
                     if person.current_status == 'present':
                         self._set_confirmed_absent_locked(person, now)
                 self._save_presence_records_locked()
-                self._annotated_jpeg = None
-                self._annotated_depth_jpeg = None
                 self._last_render_at = 0.0
-                self._render_seq = 0
+                with self._frame_lock:
+                    self._annotated_jpeg = None
+                    self._annotated_depth_jpeg = None
+                    self._render_seq = 0
                 self._distance_smooth_cache = {}
                 self._cleanup_pose_fusion_tracks(now, reset=True)
                 confirmed_payload = self._build_confirmed_payload_locked(
@@ -3046,9 +3050,10 @@ class RecognitionPipeline:
 
         if not self.get_attendance_mode():
             with self._lock:
-                self._annotated_jpeg = None
-                self._annotated_depth_jpeg = None
                 self._last_render_at = 0.0
+                with self._frame_lock:
+                    self._annotated_jpeg = None
+                    self._annotated_depth_jpeg = None
                 self._distance_smooth_cache = {}
                 self._cleanup_pose_fusion_tracks(now, reset=True)
             return
@@ -3088,10 +3093,12 @@ class RecognitionPipeline:
                     include_presence_points=False,
                     include_metrics=False,
                 )
-                self._annotated_jpeg = self._encode_frame(frame)
-                self._annotated_depth_jpeg = None
+                encoded_frame = self._encode_frame(frame)
                 self._last_render_at = 0.0
-                self._render_seq = 0
+                with self._frame_lock:
+                    self._annotated_jpeg = encoded_frame
+                    self._annotated_depth_jpeg = None
+                    self._render_seq = 0
                 self._distance_smooth_cache = {}
                 self._cleanup_pose_fusion_tracks(now, reset=True)
                 self._status.update(
@@ -3110,6 +3117,8 @@ class RecognitionPipeline:
                 )
             return
 
+        _new_color = None
+        _new_depth = None
         with self._lock:
             self._match_detections_locked(person_boxes, now)
             self._update_classroom_metrics_locked(frame.shape, depth_frame, now)
@@ -3120,14 +3129,19 @@ class RecognitionPipeline:
             )
             if should_render:
                 annotated = self._annotate_frame_locked(frame)
-                self._annotated_jpeg = self._encode_frame(annotated)
+                _new_color = self._encode_frame(annotated)
                 depth_annotated = self._annotate_depth_frame_locked(
                     depth_visual_frame,
                     depth_frame,
                     frame.shape,
                 )
-                self._annotated_depth_jpeg = self._encode_frame(depth_annotated) if depth_annotated is not None else None
+                _new_depth = self._encode_frame(depth_annotated) if depth_annotated is not None else None
                 self._last_render_at = now
+
+        if should_render:
+            with self._frame_lock:
+                self._annotated_jpeg = _new_color
+                self._annotated_depth_jpeg = _new_depth
                 self._render_seq += 1
 
     def _loop(self):
@@ -3200,8 +3214,9 @@ class RecognitionPipeline:
                         include_presence_points=False,
                         include_metrics=False,
                     )
-                    self._annotated_jpeg = None
-                    self._annotated_depth_jpeg = None
+                    with self._frame_lock:
+                        self._annotated_jpeg = None
+                        self._annotated_depth_jpeg = None
                     self._distance_smooth_cache = {}
                     self._cleanup_pose_fusion_tracks(time.time(), reset=True)
                     self._status.update(
