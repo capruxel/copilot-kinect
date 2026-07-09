@@ -13,8 +13,8 @@ dependencies = [
     "pillow==12.1.1",
     "matplotlib==3.10.8",
     "scikit-learn==1.7.2",
-    "torch==2.11.0+cu128 ; platform_system == 'Windows'",
-    "torchvision==0.26.0+cu128 ; platform_system == 'Windows'",
+    "torch==2.11.0+cu130 ; platform_system == 'Windows'",
+    "torchvision==0.26.0+cu130 ; platform_system == 'Windows'",
     "ultralytics==8.4.31",
     "onnxruntime-gpu==1.23.2 ; platform_system == 'Windows'",
     "insightface==1.0.1",
@@ -27,12 +27,12 @@ dependencies = [
 package = false
 
 [tool.uv.sources]
-torch = [{ index = "pytorch-cu128", marker = "platform_system == 'Windows'" }]
-torchvision = [{ index = "pytorch-cu128", marker = "platform_system == 'Windows'" }]
+torch = [{ index = "pytorch-cu130", marker = "platform_system == 'Windows'" }]
+torchvision = [{ index = "pytorch-cu130", marker = "platform_system == 'Windows'" }]
 pykinect2 = { git = "https://github.com/Kinect/PyKinect2.git", rev = "c86d575175edf5fc0834590acdfb82b55b5ccd96" }
 
 [[tool.uv.index]]
-name = "pytorch-cu128"
-url = "https://download.pytorch.org/whl/cu128"
+name = "pytorch-cu130"
+url = "https://download.pytorch.org/whl/cu130"
 explicit = true
 
