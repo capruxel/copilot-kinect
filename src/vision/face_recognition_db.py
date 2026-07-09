@@ -178,7 +178,7 @@ class FaceRecognitionDB:
 
             providers = self._resolve_insightface_runtime()
             app = FaceAnalysis(name='buffalo_l', providers=providers)
-            app.prepare()
+            app.prepare(ctx_id=-1)
             self._app = app
             self._app_providers = providers
             return app
