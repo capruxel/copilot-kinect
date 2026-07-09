@@ -2,13 +2,13 @@
 # YOLO 姿態模型路徑（相對於專案根目錄或絕對路徑）
 pose_model = "models/yolo/yolo26m-pose.pt"
 
-# YOLO 推論裝置：cpu / cuda / cuda:0 / auto
-# 目前 PyTorch wheel 不支援 CUDA 13.0 驅動，請使用 cpu
-device = "cpu"
+# YOLO 推論裝置：auto / cpu / cuda / cuda:0
+# auto = 有 CUDA GPU 就用 GPU，否則用 CPU
+device = "auto"
 
 [insightface]
-# ONNX Runtime 執行提供者，逗號分隔
-providers = "CPUExecutionProvider"
+# ONNX Runtime 執行提供者，逗號分隔（CPUExecutionProvider 會自動附加）
+providers = "CUDAExecutionProvider"
 
 [kinect]
 # Kinect 硬體後端：auto / kinect_v2 / kinect_v1
