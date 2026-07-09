@@ -56,32 +56,18 @@ uv sync
 
 ## 初始設定
 
+複製並編輯專案設定檔：
+
+```powershell
+Copy-Item config.example.toml config.toml
+```
+
+`config.toml` 統一管理所有執行環境變數（YOLO 模型路徑、推論裝置、Kinect 後端等），啟動時自動載入，不需要每次手動打 `$env:`。結構化設定位於各區塊（`[models]`、`[kinect]`、`[insightface]`、`[webhook]`），也可以用 `[env]` 區塊直接覆蓋任意環境變數。詳見 `config.example.toml` 內註解。
+
 複製管理者設定範例：
 
 ```powershell
 Copy-Item data\administrators.example.json data\administrators.json
-```
-
-如需啟用 Power Automate 上傳，設定 webhook URL：
-
-```powershell
-$env:POWER_AUTOMATE_UPLOAD_URL="https://..."
-```
-
-沒有設定 `POWER_AUTOMATE_UPLOAD_URL` 時，系統仍可正常執行，只會略過 webhook 上傳。
-
-## 模型權重
-
-YOLO 權重請放在 `models/yolo/`。目前主要使用：
-
-```text
-models/yolo/yolo26x-pose.pt
-```
-
-如果要用其他 pose 模型，可以透過環境變數指定：
-
-```powershell
-$env:YOLO_POSE_MODEL="models/yolo/your-model.pt"
 ```
 
 大型模型檔、影片、embedding database、學生臉部資料與本機設定不會進入 Git。請勿把真實學生個資、webhook URL、課堂影片或模型權重直接提交到 GitHub。
@@ -109,7 +95,7 @@ http://127.0.0.1:5000/dashboard
 uv run python scripts\rebuild_face_db.py
 ```
 
-檢查 GPU / ONNX Runtime（包含 VC++ Runtime、CUDA、PyTorch、ONNX 與依賴匯入）：
+檢查 VC++ Runtime、config.toml、GPU、CUDA、PyTorch、ONNX 與依賴匯入：
 
 ```powershell
 uv run python scripts\check_gpu_runtime.py
