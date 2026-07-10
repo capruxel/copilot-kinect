@@ -428,46 +428,46 @@ class FaceRecognitionDB:
 
     def build_database(self):
         self.ensure_storage()
-        students = []
         profiles = self.load_user_profiles()
 
+        students = []
+        for student_dir in sorted(path for path in self.photo_root.iterdir() if path.is_dir()):
+            embeddings = []
+            image_count = 0
+
+            for image_path in sorted(student_dir.iterdir()):
+                if image_path.suffix.lower() not in {'.jpg', '.jpeg', '.png', '.bmp'}:
+                    continue
+
+                image = self._read_image(image_path)
+                embedding = self._extract_embedding(image)
+                image_count += 1
+                if embedding is not None:
+                    embeddings.append(embedding)
+
+            if embeddings:
+                embedding_size = len(embeddings[0])
+                mean_embedding = [
+                    sum(item[index] for item in embeddings) / len(embeddings)
+                    for index in range(embedding_size)
+                ]
+
+                profile = profiles.get(student_dir.name, {})
+                students.append(
+                    {
+                        'label': student_dir.name,
+                        'display_name': profile.get('name', student_dir.name),
+                        'student_id': profile.get('student_id', ''),
+                        'college': profile.get('college', ''),
+                        'department': profile.get('department', ''),
+                        'title': profile.get('title', ''),
+                        'image_count': image_count,
+                        'matched_images': len(embeddings),
+                        'embedding': mean_embedding,
+                    }
+                )
+
         with self._lock:
-            for student_dir in sorted(path for path in self.photo_root.iterdir() if path.is_dir()):
-                embeddings = []
-                image_count = 0
-
-                for image_path in sorted(student_dir.iterdir()):
-                    if image_path.suffix.lower() not in {'.jpg', '.jpeg', '.png', '.bmp'}:
-                        continue
-
-                    image = self._read_image(image_path)
-                    embedding = self._extract_embedding(image)
-                    image_count += 1
-                    if embedding is not None:
-                        embeddings.append(embedding)
-
-                if embeddings:
-                    embedding_size = len(embeddings[0])
-                    mean_embedding = []
-                    for index in range(embedding_size):
-                        mean_embedding.append(sum(item[index] for item in embeddings) / len(embeddings))
-
-                    profile = profiles.get(student_dir.name, {})
-
-                    students.append(
-                        {
-                            'label': student_dir.name,
-                            'display_name': profile.get('name', student_dir.name),
-                            'student_id': profile.get('student_id', ''),
-                            'college': profile.get('college', ''),
-                            'department': profile.get('department', ''),
-                            'title': profile.get('title', ''),
-                            'image_count': image_count,
-                            'matched_images': len(embeddings),
-                            'embedding': mean_embedding,
-                        }
-                    )
-
             payload = {
                 'students': students,
                 'photo_root': str(self.photo_root),
