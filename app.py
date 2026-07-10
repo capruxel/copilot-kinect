@@ -1,4 +1,5 @@
 ﻿import json
+import logging
 import os
 import threading
 from pathlib import Path
@@ -23,6 +24,7 @@ from src.vision.kinect_service import KinectService
 from src.vision.attendance_pipeline import RecognitionPipeline
 
 app = Flask(__name__)
+logging.basicConfig(level=logging.INFO, format='%(asctime)s [%(levelname)s] %(message)s')
 USERS_FILE = BASE_DIR / 'data' / 'administrators.json'
 FACE_DB = FaceRecognitionDB(BASE_DIR)
 KINECT_SERVICE = KinectService(BASE_DIR)
@@ -472,7 +474,7 @@ class MinuteStudentCsvExporter:
             response.raise_for_status()
             return True
         except Exception as exc:
-            print(f'Power Automate metric upload failed: {exc}', flush=True)
+            logging.warning('Power Automate metric upload failed: %s', exc)
             return False
 
     def _should_emit_metric_row(self, course_id, student_id, metric_key, day_tag, recorded_at):
@@ -629,14 +631,27 @@ class MinuteStudentCsvExporter:
                 self._next_export_at = now + self.INTERVAL_SECONDS
                 try:
                     self._export_once(now)
-                except Exception:
-                    # Auto export should never interrupt the dashboard runtime.
-                    pass
+                except Exception as exc:
+                    logging.warning('CSV export failed, will retry: %s', exc)
             self._stop_event.wait(1.0)
 
 
 AUTO_CSV_EXPORTER = MinuteStudentCsvExporter(BASE_DIR, RECOGNITION_PIPELINE)
-atexit.register(AUTO_CSV_EXPORTER.stop)
+
+
+def _shutdown():
+    AUTO_CSV_EXPORTER.stop()
+    RECOGNITION_PIPELINE.stop()
+    KINECT_SERVICE.close()
+
+
+atexit.register(_shutdown)
+
+
+@app.errorhandler(Exception)
+def handle_uncaught(exc):
+    logging.exception('Unhandled exception')
+    return jsonify(error=str(exc)), 500
 
 
 @app.route('/', methods=['GET'])
