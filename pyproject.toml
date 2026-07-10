@@ -23,6 +23,9 @@ dependencies = [
     "tomli>=2.0,<3",
 ]
 
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
 [tool.uv]
 package = false
 override-dependencies = [
@@ -39,4 +42,10 @@ pykinect2 = { git = "https://github.com/Kinect/PyKinect2.git", rev = "c86d575175
 name = "pytorch-cu130"
 url = "https://download.pytorch.org/whl/cu130"
 explicit = true
+
+[dependency-groups]
+dev = [
+    "coverage>=7.15.0",
+    "pytest>=9.1.1",
+]
 
