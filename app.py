@@ -185,6 +185,7 @@ class MinuteStudentCsvExporter:
         'recorded_at',
         'label',
         'value',
+        'source',
     ]
     METRIC_METADATA = {
         'presence': {'name': '存在時間', 'chart_type': 'line'},
@@ -368,6 +369,7 @@ class MinuteStudentCsvExporter:
             'recorded_at': str(row.get('recorded_at') or '').strip(),
             'label': str(row.get('label') or '').strip(),
             'value': self._coerce_json_integer(row.get('value')),
+            'source': str(row.get('source') or 'sensor').strip(),
         }
 
     def _build_json_payload(self, rows, snapshot, now):
@@ -531,6 +533,7 @@ class MinuteStudentCsvExporter:
                         'recorded_at': recorded_at,
                         'label': '在場中' if point_value > 0 else '已離開',
                         'value': point_value,
+                        'source': 'sensor',
                     }
                 )
 
@@ -555,6 +558,7 @@ class MinuteStudentCsvExporter:
                             'recorded_at': recorded_at,
                             'label': metric_row.get('label', ''),
                             'value': metric_row.get('value', ''),
+                            'source': 'sensor',
                         }
                     )
 
@@ -596,6 +600,7 @@ class MinuteStudentCsvExporter:
                             'recorded_at': recorded_at,
                             'label': label_text,
                             'value': history_row.get('value', ''),
+                            'source': 'simulated',
                         }
                     )
 
