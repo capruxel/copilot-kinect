@@ -41,6 +41,10 @@ __pycache__/
 .ruff_cache/
 .ipynb_checkpoints/
 
+# Coverage and build artifacts
+.coverage
+*.egg-info/
+
 # OS / editor noise
 .DS_Store
 Thumbs.db
