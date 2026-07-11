@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>教室區域專注燈號</title>
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: -apple-system, "Microsoft JhengHei", sans-serif;
+            background: #0f172a;
+            color: #e2e8f0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 24px;
+        }
+        .led-strip-panel {
+            width: 100%;
+            max-width: 680px;
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(148, 163, 184, 0.16);
+            border-radius: 16px;
+            padding: 24px 28px 28px;
+        }
+        .led-strip-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .led-strip-head h1 {
+            font-size: 18px;
+            font-weight: 700;
+        }
+        .led-strip-legend {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 13px;
+            color: #94a3b8;
+        }
+        .led-legend-dot {
+            display: inline-block;
+            width: 12px; height: 12px;
+            border-radius: 50%;
+            margin-right: 4px;
+            vertical-align: middle;
+        }
+        .led-legend-g { background: #22c55e; }
+        .led-legend-b { background: #3b82f6; }
+        .led-legend-r { background: #ef4444; }
+        .led-legend-off { background: #374151; border: 1px solid #4b5563; }
+        .led-strip-body { display: flex; gap: 12px; }
+        .led-region { flex: 1; text-align: center; }
+        .led-region-label {
+            display: block;
+            font-size: 13px;
+            color: #64748b;
+            margin-bottom: 10px;
+            font-weight: 500;
+        }
+        .led-bar {
+            height: 100px;
+            border-radius: 10px;
+            background: #1e293b;
+            transition: background 0.4s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        .led-bar::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: 10px;
+            box-shadow: inset 0 2px 8px rgba(255,255,255,0.08), inset 0 -2px 6px rgba(0,0,0,0.3);
+        }
+        .led-info {
+            display: block;
+            font-size: 11px;
+            color: #94a3b8;
+            margin-top: 6px;
+        }
+        .led-status {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 13px;
+            color: #475569;
+        }
+        .led-status.error { color: #ef4444; }
+    </style>
+</head>
+<body>
+    <div class="led-strip-panel" id="led-strip-panel">
+        <div class="led-strip-head">
+            <h1>教室區域專注燈號</h1>
+            <div class="led-strip-legend">
+                <span><span class="led-legend-dot led-legend-g"></span> 高專注</span>
+                <span><span class="led-legend-dot led-legend-b"></span> 普通</span>
+                <span><span class="led-legend-dot led-legend-r"></span> 低專注</span>
+                <span><span class="led-legend-dot led-legend-off"></span> 無人</span>
+            </div>
+        </div>
+        <div class="led-strip-body" id="led-strip-body">
+            <div class="led-region" data-region="0">
+                <span class="led-region-label">第1排</span>
+                <div class="led-bar"></div>
+                <span class="led-info"></span>
+            </div>
+            <div class="led-region" data-region="1">
+                <span class="led-region-label">第2排</span>
+                <div class="led-bar"></div>
+                <span class="led-info"></span>
+            </div>
+            <div class="led-region" data-region="2">
+                <span class="led-region-label">第3排</span>
+                <div class="led-bar"></div>
+                <span class="led-info"></span>
+            </div>
+            <div class="led-region" data-region="3">
+                <span class="led-region-label">第4排</span>
+                <div class="led-bar"></div>
+                <span class="led-info"></span>
+            </div>
+            <div class="led-region" data-region="4">
+                <span class="led-region-label">第5排</span>
+                <div class="led-bar"></div>
+                <span class="led-info"></span>
+            </div>
+        </div>
+        <div class="led-status" id="led-status">等待教室資料...</div>
+    </div>
+
+    <script>
+        const colorMap = { g: '#22c55e', r: '#ef4444', b: '#3b82f6', off: '#1e293b' };
+        const statusEl = document.getElementById('led-status');
+        const body = document.getElementById('led-strip-body');
+
+        function render(regions) {
+            let ok = false;
+            for (const r of regions || []) {
+                const el = body.querySelector(`[data-region="${r.region}"]`);
+                if (!el) continue;
+                ok = true;
+                const bar = el.querySelector('.led-bar');
+                const info = el.querySelector('.led-info');
+                if (bar) bar.style.background = colorMap[r.color] || colorMap.off;
+                if (info) {
+                    if (r.count > 0) {
+                        info.textContent = `${r.median !== null ? r.median : '?'} · ${r.count}人`;
+                    } else {
+                        info.textContent = '';
+                    }
+                }
+            }
+            if (ok) {
+                statusEl.textContent = `更新於 ${new Date().toLocaleTimeString()}`;
+                statusEl.classList.remove('error');
+            }
+        }
+
+        async function poll() {
+            try {
+                const res = await fetch('/api/attendance/region-focus');
+                const regions = await res.json();
+                render(regions);
+            } catch (_) {
+                statusEl.textContent = '無法連線至伺服器';
+                statusEl.classList.add('error');
+            }
+        }
+
+        poll();
+        setInterval(poll, 2000);
+    </script>
+</body>
+</html>

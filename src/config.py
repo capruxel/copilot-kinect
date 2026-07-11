@@ -11,6 +11,15 @@ SECTION_KEY_MAP = {
     ("kinect", "video_source"): "KINECT_VIDEO_SOURCE",
     ("kinect", "video_loop"): "KINECT_VIDEO_LOOP",
     ("webhook", "power_automate_url"): "POWER_AUTOMATE_UPLOAD_URL",
+    ("led_strip", "driver"): "LED_STRIP_DRIVER",
+    ("led_strip", "host_port"): "LED_STRIP_HOST_PORT",
+    ("led_strip", "num_regions"): "LED_STRIP_NUM_REGIONS",
+    ("led_strip", "red_threshold"): "LED_STRIP_RED_THRESHOLD",
+    ("led_strip", "green_threshold"): "LED_STRIP_GREEN_THRESHOLD",
+    ("led_strip", "window_seconds"): "LED_STRIP_WINDOW_SECONDS",
+    ("led_strip", "update_interval"): "LED_STRIP_UPDATE_INTERVAL",
+    ("led_strip", "esp32_host"): "LED_STRIP_ESP32_HOST",
+    ("led_strip", "log_path"): "LED_STRIP_LOG_PATH",
 }
 
 
@@ -77,7 +86,7 @@ def get_config_summary(config_path):
     for (section, key), env_name in SECTION_KEY_MAP.items():
         try:
             values[env_name] = data[section][key]
-        except KeyError:
+        except (KeyError, TypeError):
             pass
 
     env_section = data.get("env", {})

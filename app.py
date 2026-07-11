@@ -34,6 +34,62 @@ PENDING_TRAINING_CAPTURES = {}
 PENDING_TRAINING_LOCK = threading.Lock()
 POWER_AUTOMATE_UPLOAD_URL = os.environ.get("POWER_AUTOMATE_UPLOAD_URL", "").strip()
 
+from src.led.led_strip_driver import MockLedDriver, TcpLedStripDriver  # noqa: E402
+
+if os.environ.get("LED_STRIP_DRIVER", "mock") == "tcp":
+    LED_STRIP_DRIVER = TcpLedStripDriver(
+        host=os.environ.get("LED_STRIP_ESP32_HOST", "0.0.0.0"),
+        port=int(os.environ.get("LED_STRIP_HOST_PORT", "8765")),
+    )
+    LED_STRIP_DRIVER.start()
+else:
+    LED_STRIP_DRIVER = MockLedDriver(os.environ.get("LED_STRIP_LOG_PATH", "data/led_strip_log.jsonl"))
+
+
+class LedStripUpdater:
+    def __init__(self, pipeline, driver, interval=1.5):
+        self._pipeline = pipeline
+        self._driver = driver
+        self._interval = interval
+        self._stop_event = threading.Event()
+        self._lock = threading.Lock()
+        self._forced_state = None
+        self._thread = threading.Thread(target=self._run, daemon=True)
+        self._thread.start()
+
+    def _run(self):
+        while not self._stop_event.wait(self._interval):
+            try:
+                with self._lock:
+                    region_state = self._forced_state
+                if region_state is None:
+                    region_state = self._pipeline.get_region_focus()
+                self._driver.update(region_state)
+            except Exception:
+                pass
+
+    def set_forced(self, region_state):
+        with self._lock:
+            self._forced_state = region_state
+        self._driver.update(region_state)
+
+    def set_auto(self):
+        with self._lock:
+            self._forced_state = None
+        self._driver.update(self._pipeline.get_region_focus())
+
+    def stop(self):
+        self._stop_event.set()
+        if self._thread.is_alive():
+            self._thread.join(timeout=2.0)
+
+
+LED_STRIP_UPDATER = LedStripUpdater(
+    RECOGNITION_PIPELINE,
+    LED_STRIP_DRIVER,
+    interval=float(os.environ.get("LED_STRIP_UPDATE_INTERVAL", "1.5")),
+)
+
 
 def load_users():
     with USERS_FILE.open(encoding="utf-8-sig") as users_file:
@@ -274,11 +330,11 @@ class MinuteStudentCsvExporter:
         return rows_by_key
 
     def _stable_seed(self, value):
-        # ponytail: custom FNV hash replaced with built-in hash
+        # ponytail: process-local stability is enough; use hashlib if persistence matters.
         return hash(str(value or ""))
 
     def _pseudo_random(self, seed, index=0):
-        # ponytail: sin PRNG replaced with random.Random
+        # ponytail: dashboard sampling is non-cryptographic.
         return random.Random(int(seed) + int(index)).random()
 
     def _recent_week_labels(self, now, count):
@@ -624,12 +680,19 @@ AUTO_CSV_EXPORTER = MinuteStudentCsvExporter(BASE_DIR, RECOGNITION_PIPELINE)
 
 
 def _shutdown():
+    LED_STRIP_UPDATER.stop()
+    LED_STRIP_DRIVER.close()
     AUTO_CSV_EXPORTER.stop()
     RECOGNITION_PIPELINE.stop()
     KINECT_SERVICE.close()
 
 
 atexit.register(_shutdown)
+
+
+@app.route("/led")
+def led_page():
+    return render_template("led.html")
 
 
 @app.errorhandler(Exception)
@@ -749,6 +812,32 @@ def attendance_status():
             metrics_user_id=metrics_user_id,
         )
     )
+
+
+@app.route("/api/attendance/region-focus")
+def region_focus():
+    return jsonify(RECOGNITION_PIPELINE.get_region_focus())
+
+
+@app.route("/api/led-strip/status")
+def led_strip_status():
+    return jsonify(LED_STRIP_DRIVER.get_status())
+
+
+@app.route("/api/led-strip/control", methods=["POST"])
+def led_strip_control():
+    payload = request.get_json(silent=True) or {}
+    mode = payload.get("mode", "auto")
+    if mode == "force":
+        regions_data = payload.get("regions", [])
+        forced = [
+            {"region": r["region"], "color": r.get("c", "off"), "median": None, "count": r.get("count", 0)}
+            for r in regions_data
+        ]
+        LED_STRIP_UPDATER.set_forced(forced)
+        return jsonify({"status": "ok", "mode": "force"})
+    LED_STRIP_UPDATER.set_auto()
+    return jsonify({"status": "ok", "mode": "auto"})
 
 
 @app.route("/api/attendance/course", methods=["POST"])

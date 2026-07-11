@@ -34,3 +34,17 @@ power_automate_url = ""
 # YOLO_DEVICE = "cpu"
 # INSIGHTFACE_PROVIDERS = "CPUExecutionProvider"
 # POWER_AUTOMATE_UPLOAD_URL = "https://..."
+
+# ---------------------------------------------------------------------
+# LED 燈條設定（用於教室區域專注度指示）
+# ---------------------------------------------------------------------
+[led_strip]
+driver = "mock"                          # mock 或 tcp
+host_port = 8765                         # TCP 伺服器 port
+num_regions = 5                          # 教室排數（區域數）
+red_threshold = 30.0                     # 專注度 ≤ 此值 → 紅燈
+green_threshold = 60.0                   # 專注度 ≥ 此值 → 綠燈
+window_seconds = 10.0                    # 中位數計算時間窗口（秒）
+update_interval = 1.5                    # 區域狀態推送間隔（秒）
+esp32_host = "0.0.0.0"                   # TCP driver 監聽位址
+log_path = "data/led_strip_log.jsonl"    # Mock driver 日誌路徑
