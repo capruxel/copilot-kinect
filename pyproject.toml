@@ -47,7 +47,26 @@ explicit = true
 
 [dependency-groups]
 dev = [
+    "basedpyright>=1.29.0",
     "coverage>=7.15.0",
     "pytest>=9.1.1",
+    "ruff>=0.14.0",
 ]
+
+[tool.ruff]
+target-version = "py311"
+line-length = 120
+exclude = ["reels", "scripts", "clustering"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "N", "W"]
+ignore = ["E501"]
+
+[tool.basedpyright]
+typeCheckingMode = "basic"
+include = ["src"]
+exclude = ["reels", "scripts", "clustering"]
+reportMissingImports = false
+reportMissingModuleSource = false
+reportUntitledVariable = false
 

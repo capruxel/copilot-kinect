@@ -1,15 +1,11 @@
 import json
-import os
 import threading
 import time
 from dataclasses import dataclass, field
 from pathlib import Path
 
+from src.vision.detector import PersonDetector, _env_bool, _env_float, _env_int
 from src.vision.pose_depth_metrics import PoseDepthMetricEngine
-from src.vision.detector import PersonDetector, _env_float, _env_bool, _env_int
-
-
-
 
 
 @dataclass
@@ -323,7 +319,6 @@ class RecognitionPipeline:
         for segment in segments[1:]:
             current = merged[-1]
             current_end = float('inf') if current['end'] is None else current['end']
-            segment_end = float('inf') if segment['end'] is None else segment['end']
 
             if segment['start'] <= current_end + 1.0:
                 current['end'] = None if current['end'] is None or segment['end'] is None else max(current['end'], segment['end'])

@@ -371,8 +371,6 @@ class PoseDepthMetricEngine:
         right_eye_point = self._point_from_keypoint(keypoints, keypoint_confidence, self.COCO_RIGHT_EYE)
         left_shoulder_point = self._point_from_keypoint(keypoints, keypoint_confidence, self.COCO_LEFT_SHOULDER)
         right_shoulder_point = self._point_from_keypoint(keypoints, keypoint_confidence, self.COCO_RIGHT_SHOULDER)
-        left_elbow_point = self._point_from_keypoint(keypoints, keypoint_confidence, self.COCO_LEFT_ELBOW)
-        right_elbow_point = self._point_from_keypoint(keypoints, keypoint_confidence, self.COCO_RIGHT_ELBOW)
         left_wrist_point = self._point_from_keypoint(keypoints, keypoint_confidence, self.COCO_LEFT_WRIST)
         right_wrist_point = self._point_from_keypoint(keypoints, keypoint_confidence, self.COCO_RIGHT_WRIST)
         left_hip_point = self._point_from_keypoint(keypoints, keypoint_confidence, self.COCO_LEFT_HIP)

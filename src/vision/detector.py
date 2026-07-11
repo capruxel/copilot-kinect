@@ -1,7 +1,6 @@
 import json
 import os
 import threading
-import time
 from pathlib import Path
 
 
@@ -244,7 +243,6 @@ class PersonDetector:
                 from ultralytics import YOLO  # pylint: disable=import-outside-toplevel
 
                 selected_model_ref = None
-                selected_model_name = ''
                 model_candidates = list(self.MODEL_CANDIDATES)
                 model_override = str(os.getenv('YOLO_POSE_MODEL', '')).strip()
                 if model_override:
@@ -266,11 +264,9 @@ class PersonDetector:
                         if not candidate_path.exists():
                             continue
                         selected_model_ref = str(candidate_path)
-                        selected_model_name = candidate_name
                         break
 
                     selected_model_ref = str(model_ref)
-                    selected_model_name = candidate_name
                     break
 
                 if selected_model_ref is None:
