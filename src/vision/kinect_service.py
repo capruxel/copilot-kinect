@@ -4,38 +4,8 @@ import threading
 import time
 from pathlib import Path
 
+from src.vision.detector import _env_bool, _env_float, _env_int
 from src.vision.rgb_depth_alignment import RgbDepthAligner
-
-
-def _env_float(name, default):
-    raw = os.getenv(name, '').strip()
-    if not raw:
-        return float(default)
-    try:
-        return float(raw)
-    except Exception:
-        return float(default)
-
-
-def _env_int(name, default):
-    raw = os.getenv(name, '').strip()
-    if not raw:
-        return int(default)
-    try:
-        return int(raw)
-    except Exception:
-        return int(default)
-
-
-def _env_bool(name, default):
-    raw = os.getenv(name, '').strip().lower()
-    if not raw:
-        return bool(default)
-    if raw in {'1', 'true', 'yes', 'on'}:
-        return True
-    if raw in {'0', 'false', 'no', 'off'}:
-        return False
-    return bool(default)
 
 
 class KinectService:

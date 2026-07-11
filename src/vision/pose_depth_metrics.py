@@ -1,7 +1,9 @@
 import math
-import os
+import statistics
 import time
 from dataclasses import dataclass, field
+
+from src.vision.detector import _env_float
 
 
 def _clamp(value, min_value, max_value):
@@ -29,30 +31,17 @@ def _trim_metric_rows(rows, now, window_seconds):
 
 
 def _safe_mean(values):
+    # ponytail: statistics.mean raises on empty, this returns 0.0
     if not values:
         return 0.0
-    return sum(float(item) for item in values) / float(len(values))
+    return statistics.mean(values)
 
 
 def _safe_std(values):
+    # ponytail: statistics.stdev raises on <2 values, this returns 0.0
     if len(values) <= 1:
         return 0.0
-    mean_value = _safe_mean(values)
-    variance = _safe_mean([(float(item) - mean_value) ** 2 for item in values])
-    return variance ** 0.5
-
-
-def _env_float(name, default):
-    raw = os.getenv(name, '')
-    if raw is None:
-        return float(default)
-    raw = str(raw).strip()
-    if raw == '':
-        return float(default)
-    try:
-        return float(raw)
-    except Exception:
-        return float(default)
+    return statistics.pstdev(values)
 
 
 @dataclass
