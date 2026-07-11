@@ -110,7 +110,23 @@ uv run python clustering\k_means.py
 ## 測試
 
 ```powershell
-uv run python -m unittest discover tests
+uv run python -m pytest tests -v
 ```
 
-目前測試以姿態與深度指標邏輯為主，不需要接上實體 Kinect。
+測試主要是純邏輯（detector、face_recognition_db、pose_depth_metrics 等），不需要接上實體 Kinect。硬體/GPU/模型檢查放在 `scripts/`。
+
+## Pre-commit
+
+本專案使用 [prek](https://prek.j178.dev/) 管理 Git hooks，每次 commit 自動執行：
+
+```powershell
+prek install
+```
+
+Hooks 包含 ruff lint/format、basedpyright 型別檢查、pytest、以及檔案格式檢查（trailing-whitespace、end-of-file-fixer、check-yaml、check-toml、check-merge-conflict、detect-private-key）。
+
+手動跑全部 hooks：
+
+```powershell
+prek run --all-files
+```

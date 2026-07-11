@@ -26,17 +26,27 @@ Copy-Item data\administrators.example.json data\administrators.json
 
 ```powershell
 uv run python app.py                          # Flask (debug=False, threaded)
-uv run python -m unittest discover tests      # no hardware needed
+uv run python -m pytest tests -v              # no hardware needed
 uv run python scripts\rebuild_face_db.py
 uv run python scripts\check_gpu_runtime.py
 uv run python clustering\k_means.py
+prek run --all-files                          # run all pre-commit hooks
+```
+
+## Pre-commit
+
+`prek.toml` — prek (Rust drop-in for pre-commit). Hooks: ruff + ruff-format, basedpyright type-check, pytest, builtin checks (whitespace, EOF, yaml, toml, merge-conflict, private-key).
+
+```powershell
+prek install       # install git hook shims
+prek run           # run on staged files
 ```
 
 ## Gotchas
 
 - **Background thread at import time**: `MinuteStudentCsvExporter` (`app.py:633`) starts on module load, exports per-minute CSV to `history/`. Stopped via `atexit`.
 - **Thread safety**: `pending_training_captures` uses `threading.Lock()`.
-- **Tests**: Only `tests/test_pose_depth_metrics.py` — pure logic only. Hardware/GPU/model checks are in `scripts/`.
+- **Tests**: Pure logic only (detector, face_recognition_db, pose_depth_metrics, config). Hardware/GPU/model checks are in `scripts/`.
 - **Determinism**: `clustering/k_means.py` uses `RANDOM_SEED = 42`.
 - **Large assets** (`.pt`, `.onnx`, videos, embeddings, captures): don't commit.
 - **Route shapes**: Preserve existing API shapes unless explicitly asked.
