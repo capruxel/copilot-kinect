@@ -45,76 +45,37 @@ class RgbDepthAligner:
     def __init__(self, base_dir):
         self.base_dir = Path(base_dir)
         self.profile_file = self.base_dir / 'data' / 'kinect_alignment_profiles.json'
-        self._profiles_cache = None
-        self._profiles_mtime = None
         self._v2_color_space_buffer = None
         self._v2_color_space_view = None
         self._v2_color_space_count = 0
 
     def default_payload(self):
-        return {
-            key: asdict(profile)
-            for key, profile in self.DEFAULT_PROFILES.items()
-        }
+        return {key: asdict(profile) for key, profile in self.DEFAULT_PROFILES.items()}
 
-    def _coerce_profile(self, payload):
-        default = AlignmentProfile()
-        if not isinstance(payload, dict):
-            return default
-        safe = {}
-        for field_name in AlignmentProfile.__dataclass_fields__:
-            value = payload.get(field_name, getattr(default, field_name))
-            if field_name in {'enabled', 'mirror_x', 'mirror_y', 'prefer_native_mapper'}:
-                safe[field_name] = bool(value)
-            elif field_name == 'hole_fill_kernel':
-                try:
-                    safe[field_name] = max(0, int(value))
-                except Exception:
-                    safe[field_name] = getattr(default, field_name)
-            else:
-                try:
-                    safe[field_name] = float(value)
-                except Exception:
-                    safe[field_name] = getattr(default, field_name)
-        return AlignmentProfile(**safe)
-
-    def _load_profiles(self):
+    def _read_profiles(self):
         if not self.profile_file.exists():
-            return self.default_payload()
-
+            return self.DEFAULT_PROFILES.copy()
         try:
-            mtime = self.profile_file.stat().st_mtime
-        except OSError:
-            return self.default_payload()
-
-        if self._profiles_cache is not None and self._profiles_mtime == mtime:
-            return self._profiles_cache
-
-        try:
-            with self.profile_file.open('r', encoding='utf-8') as profile_file:
-                payload = json.load(profile_file)
+            with self.profile_file.open('r', encoding='utf-8') as f:
+                payload = json.load(f)
         except Exception:
-            payload = self.default_payload()
-
+            return self.DEFAULT_PROFILES.copy()
         if not isinstance(payload, dict):
-            payload = self.default_payload()
-
-        merged = self.default_payload()
-        for key, value in payload.items():
-            if key in merged and isinstance(value, dict):
-                merged[key] = {
-                    **merged[key],
-                    **value,
-                }
-
-        self._profiles_cache = merged
-        self._profiles_mtime = mtime
-        return merged
+            return self.DEFAULT_PROFILES.copy()
+        result = {}
+        for key, default in self.DEFAULT_PROFILES.items():
+            overrides = payload.get(key, {}) if isinstance(payload.get(key), dict) else {}
+            merged = {f: overrides.get(f, getattr(default, f)) for f in ('enabled', 'hole_fill_kernel', 'prefer_native_mapper')}
+            result[key] = AlignmentProfile(
+                enabled=bool(merged.get('enabled', True)),
+                hole_fill_kernel=max(0, int(merged.get('hole_fill_kernel', 0) or 0)),
+                prefer_native_mapper=bool(merged.get('prefer_native_mapper', True)),
+            )
+        return result
 
     def get_profile(self, backend_name):
-        profiles = self._load_profiles()
-        payload = profiles.get(backend_name, self.default_payload().get(backend_name, {}))
-        return self._coerce_profile(payload)
+        profiles = self._read_profiles()
+        return profiles.get(backend_name, self.DEFAULT_PROFILES.get(backend_name, AlignmentProfile()))
 
     def _apply_profile(self, frame, target_size, profile, is_depth):
         if frame is None:

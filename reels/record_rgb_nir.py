@@ -56,6 +56,8 @@ def configure_kinect_dlls(base_dir: Path) -> None:
 
 @contextmanager
 def suppress_stderr_fd():
+    # ponytail: contextlib.redirect_stderr(open(os.devnull,'w')) — but pykinect2
+    # writes to the raw fd, not sys.stderr, so dup2 is needed here.
     try:
         stderr_fd = sys.stderr.fileno()
     except Exception:
@@ -101,6 +103,7 @@ def safe_destroy_windows() -> None:
 
 
 def clamp_text(text: str, limit: int) -> str:
+    # ponytail: textwrap.shorten would work but adds [...] not ...
     clean = ' '.join(str(text or '').split())
     if len(clean) <= limit:
         return clean
@@ -400,49 +403,13 @@ def show_preview_frame(preview_frame: np.ndarray) -> bool:
         return _show_preview_frame_tk(preview_frame)
 
 
-def with_backend_env(backend_name: str):
-    previous = os.getenv('KINECT_BACKEND')
-    if backend_name == 'v1':
-        os.environ['KINECT_BACKEND'] = 'kinect_v1'
-    elif backend_name == 'v2':
-        os.environ['KINECT_BACKEND'] = 'kinect_v2'
-    else:
-        os.environ.pop('KINECT_BACKEND', None)
-    return previous
-
-
-def restore_backend_env(previous):
-    if previous is None:
-        os.environ.pop('KINECT_BACKEND', None)
-    else:
-        os.environ['KINECT_BACKEND'] = previous
-
-
-def load_kinect_service():
-    from src.vision.kinect_service import KinectService
-
-    class StrictKinectService(KinectService):
-        def __init__(self, base_dir, forced_backend):
-            self._forced_backend = forced_backend
-            super().__init__(base_dir)
-
-        def _kinect_backend_candidates(self):
-            if self._forced_backend == 'v1':
-                return [self.KINECT_BACKEND_V1]
-            if self._forced_backend == 'v2':
-                return [self.KINECT_BACKEND_V2]
-            return super()._kinect_backend_candidates()
-
-    return StrictKinectService
-
-
 def create_stream(base_dir: Path, backend_name: str):
-    KinectService = load_kinect_service()
-    previous_env = with_backend_env(backend_name)
-    try:
-        service = KinectService(base_dir, forced_backend=backend_name)
-    finally:
-        restore_backend_env(previous_env)
+    # ponytail: inline env set, KINECT_BACKEND env var already controls the backend
+    backend_map = {'v1': 'kinect_v1', 'v2': 'kinect_v2'}
+    if backend_name in backend_map:
+        os.environ['KINECT_BACKEND'] = backend_map[backend_name]
+    from src.vision.kinect_service import KinectService
+    service = KinectService(base_dir)
 
     return {
         'backend': backend_name,
