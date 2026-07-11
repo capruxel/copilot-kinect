@@ -48,6 +48,7 @@ explicit = true
 dev = [
     "basedpyright>=1.29.0",
     "coverage>=7.15.0",
+    "mpremote>=1.28.0",
     "pytest>=9.1.1",
     "ruff>=0.14.0",
 ]
