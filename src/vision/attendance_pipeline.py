@@ -17,9 +17,9 @@ class TemporaryPerson:
     first_seen: float
     last_seen: float
     slot_number: int = 0
-    current_status: str = 'tracking'
-    confirm_status: str = 'pending'
-    confirm_message: str = ''
+    current_status: str = "tracking"
+    confirm_status: str = "pending"
+    confirm_message: str = ""
     face_bbox: list | None = None
     face_embedding: list | None = None
     face_embedding_at: float = 0.0
@@ -37,7 +37,7 @@ class ConfirmedPerson:
     first_confirmed_at: float
     first_seen: float
     last_seen: float
-    current_status: str = 'present'
+    current_status: str = "present"
     current_tracking_id: int | None = None
     bbox: list | None = None
     presence_segments: list = field(default_factory=list)
@@ -49,11 +49,11 @@ class RecognitionPipeline:
     LOOP_INTERVAL = 0.08
     IDLE_LOOP_INTERVAL = 0.25
     IDLE_STATUS_REFRESH_INTERVAL = 0.75
-    WARMUP_ON_STARTUP = _env_bool('ATTENDANCE_WARMUP_ON_STARTUP', True)
-    WARMUP_STARTUP_DELAY = _env_float('ATTENDANCE_WARMUP_STARTUP_DELAY', 0.0)
-    RENDER_INTERVAL = _env_float('ATTENDANCE_RENDER_INTERVAL', 0.18)
-    SUMMARY_UPDATE_INTERVAL = _env_float('ATTENDANCE_SUMMARY_INTERVAL', 0.60)
-    METRIC_UPDATE_INTERVAL = _env_float('ATTENDANCE_METRIC_INTERVAL', 0.60)
+    WARMUP_ON_STARTUP = _env_bool("ATTENDANCE_WARMUP_ON_STARTUP", True)
+    WARMUP_STARTUP_DELAY = _env_float("ATTENDANCE_WARMUP_STARTUP_DELAY", 0.0)
+    RENDER_INTERVAL = _env_float("ATTENDANCE_RENDER_INTERVAL", 0.18)
+    SUMMARY_UPDATE_INTERVAL = _env_float("ATTENDANCE_SUMMARY_INTERVAL", 0.60)
+    METRIC_UPDATE_INTERVAL = _env_float("ATTENDANCE_METRIC_INTERVAL", 0.60)
     PRESENCE_SAMPLE_INTERVAL = 1.0
     PRESENCE_WINDOW_SECONDS = 600.0
     TEMP_PERSON_TIMEOUT = 1.4
@@ -69,12 +69,12 @@ class RecognitionPipeline:
     UNMATCHED_DUPLICATE_GUARD_IOU_THRESHOLD = 0.46
     UNMATCHED_DUPLICATE_GUARD_OVERLAP_RATIO = 0.64
     FACE_EMBEDDING_CACHE_SECONDS = 2.2
-    JPEG_QUALITY = _env_int('ATTENDANCE_STREAM_JPEG_QUALITY', 72)
-    STREAM_PREVIEW_MAX_WIDTH = _env_int('ATTENDANCE_STREAM_MAX_WIDTH', 1280)
+    JPEG_QUALITY = _env_int("ATTENDANCE_STREAM_JPEG_QUALITY", 72)
+    STREAM_PREVIEW_MAX_WIDTH = _env_int("ATTENDANCE_STREAM_MAX_WIDTH", 1280)
     FONT_CANDIDATES = (
-        Path(r'C:\Windows\Fonts\msjh.ttc'),
-        Path(r'C:\Windows\Fonts\msyh.ttc'),
-        Path(r'C:\Windows\Fonts\mingliu.ttc'),
+        Path(r"C:\Windows\Fonts\msjh.ttc"),
+        Path(r"C:\Windows\Fonts\msyh.ttc"),
+        Path(r"C:\Windows\Fonts\mingliu.ttc"),
     )
 
     def __init__(self, base_dir, kinect_service, face_db):
@@ -82,7 +82,7 @@ class RecognitionPipeline:
         self.kinect_service = kinect_service
         self.face_db = face_db
         self._detector = PersonDetector(base_dir, face_db=face_db)
-        self._presence_file = self.base_dir / 'data' / 'presence_records.json'
+        self._presence_file = self.base_dir / "data" / "presence_records.json"
         self._cv_modules = None
         self._pil_modules = None
         self._lock = threading.RLock()
@@ -111,23 +111,23 @@ class RecognitionPipeline:
         self._last_source_frame_timestamp = 0.0
         self._announcements = []
         self._current_course = {
-            'course_id': '',
-            'course_name': '',
+            "course_id": "",
+            "course_name": "",
         }
         self._status = {
-            'status': 'idle',
-            'message': '課堂模式尚未啟動。',
-            'attendance_mode': False,
-            'temporary_people': [],
-            'confirmed_people': [],
-            'students': [],
-            'temporary_count': 0,
-            'confirmed_present_count': 0,
-            'confirmed_total_count': len(self._confirmed_people),
-            'recognized_count': 0,
-            'yolo_person_present': False,
-            'detector_model': 'idle',
-            'announcement': '尚未開始課堂。',
+            "status": "idle",
+            "message": "課堂模式尚未啟動。",
+            "attendance_mode": False,
+            "temporary_people": [],
+            "confirmed_people": [],
+            "students": [],
+            "temporary_count": 0,
+            "confirmed_present_count": 0,
+            "confirmed_total_count": len(self._confirmed_people),
+            "recognized_count": 0,
+            "yolo_person_present": False,
+            "detector_model": "idle",
+            "announcement": "尚未開始課堂。",
         }
         self._detector.apply_runtime_tuning_profile()
         self._thread = threading.Thread(target=self._loop, daemon=True)
@@ -197,20 +197,20 @@ class RecognitionPipeline:
             return
         self._last_idle_status_at = now
         kinect_status = self.kinect_service.get_status()
-        source_status = str(kinect_status.get('status') or 'idle').strip().lower()
-        normalized_status = 'ready' if source_status == 'connected' else source_status
-        message = str(kinect_status.get('message') or '').strip() or '待機中'
+        source_status = str(kinect_status.get("status") or "idle").strip().lower()
+        normalized_status = "ready" if source_status == "connected" else source_status
+        message = str(kinect_status.get("message") or "").strip() or "待機中"
         with self._lock:
             self._status.update(
                 {
-                    'status': normalized_status,
-                    'message': message,
-                    'attendance_mode': False,
-                    'temporary_count': 0,
-                    'confirmed_present_count': 0,
-                    'recognized_count': 0,
-                    'yolo_person_present': False,
-                    'detector_model': 'idle',
+                    "status": normalized_status,
+                    "message": message,
+                    "attendance_mode": False,
+                    "temporary_count": 0,
+                    "confirmed_present_count": 0,
+                    "recognized_count": 0,
+                    "yolo_person_present": False,
+                    "detector_model": "idle",
                 }
             )
 
@@ -219,81 +219,81 @@ class RecognitionPipeline:
             return {}
 
         try:
-            with self._presence_file.open('r', encoding='utf-8') as record_file:
+            with self._presence_file.open("r", encoding="utf-8") as record_file:
                 payload = json.load(record_file)
         except Exception:
             return {}
 
         now = time.time()
         confirmed_people = {}
-        for item in payload.get('confirmed_people', []):
+        for item in payload.get("confirmed_people", []):
             segments = []
-            for segment in item.get('presence_segments', []):
-                start = float(segment.get('start', now))
-                end = segment.get('end')
+            for segment in item.get("presence_segments", []):
+                start = float(segment.get("start", now))
+                end = segment.get("end")
                 if end is not None:
                     end = float(end)
                 else:
-                    end = float(item.get('last_seen', now))
-                segments.append({'start': start, 'end': end})
+                    end = float(item.get("last_seen", now))
+                segments.append({"start": start, "end": end})
 
-            user_id = item.get('user_id')
+            user_id = item.get("user_id")
             if not user_id:
                 continue
 
             confirmed_people[user_id] = ConfirmedPerson(
                 user_id=user_id,
-                label=item.get('label', user_id),
-                name=item.get('name', item.get('display_name', user_id)),
-                student_id=item.get('student_id', ''),
-                department=item.get('department', ''),
-                title=item.get('title', ''),
-                first_confirmed_at=float(item.get('first_confirmed_at', now)),
-                first_seen=float(item.get('first_seen', item.get('first_confirmed_at', now))),
-                last_seen=float(item.get('last_seen', item.get('first_confirmed_at', now))),
-                current_status='absent',
+                label=item.get("label", user_id),
+                name=item.get("name", item.get("display_name", user_id)),
+                student_id=item.get("student_id", ""),
+                department=item.get("department", ""),
+                title=item.get("title", ""),
+                first_confirmed_at=float(item.get("first_confirmed_at", now)),
+                first_seen=float(item.get("first_seen", item.get("first_confirmed_at", now))),
+                last_seen=float(item.get("last_seen", item.get("first_confirmed_at", now))),
+                current_status="absent",
                 current_tracking_id=None,
                 bbox=None,
                 presence_segments=segments,
-                appearance_count=int(item.get('appearance_count', len(segments))),
-                last_similarity=float(item.get('last_similarity', 0.0)),
+                appearance_count=int(item.get("appearance_count", len(segments))),
+                last_similarity=float(item.get("last_similarity", 0.0)),
             )
         return confirmed_people
 
     def _save_presence_records_locked(self):
         self._presence_file.parent.mkdir(parents=True, exist_ok=True)
         payload = {
-            'confirmed_people': [
+            "confirmed_people": [
                 {
-                    'user_id': person.user_id,
-                    'label': person.label,
-                    'name': person.name,
-                    'student_id': person.student_id,
-                    'department': person.department,
-                    'title': person.title,
-                    'first_confirmed_at': person.first_confirmed_at,
-                    'first_seen': person.first_seen,
-                    'last_seen': person.last_seen,
-                    'current_status': person.current_status,
-                    'appearance_count': person.appearance_count,
-                    'last_similarity': person.last_similarity,
-                    'presence_segments': person.presence_segments,
+                    "user_id": person.user_id,
+                    "label": person.label,
+                    "name": person.name,
+                    "student_id": person.student_id,
+                    "department": person.department,
+                    "title": person.title,
+                    "first_confirmed_at": person.first_confirmed_at,
+                    "first_seen": person.first_seen,
+                    "last_seen": person.last_seen,
+                    "current_status": person.current_status,
+                    "appearance_count": person.appearance_count,
+                    "last_similarity": person.last_similarity,
+                    "presence_segments": person.presence_segments,
                 }
                 for person in sorted(self._confirmed_people.values(), key=lambda item: item.name.lower())
             ]
         }
-        with self._presence_file.open('w', encoding='utf-8') as record_file:
+        with self._presence_file.open("w", encoding="utf-8") as record_file:
             json.dump(payload, record_file, ensure_ascii=False, indent=2)
 
     def _identity_tokens_for_person(self, user_id, person):
         tokens = set()
         for value in (
             user_id,
-            getattr(person, 'label', ''),
-            getattr(person, 'student_id', ''),
-            getattr(person, 'name', ''),
+            getattr(person, "label", ""),
+            getattr(person, "student_id", ""),
+            getattr(person, "name", ""),
         ):
-            normalized = str(value or '').strip().lower()
+            normalized = str(value or "").strip().lower()
             if normalized:
                 tokens.add(normalized)
         return tokens
@@ -302,26 +302,28 @@ class RecognitionPipeline:
         segments = []
         for person in people:
             for segment in person.presence_segments:
-                start = float(segment.get('start', 0.0))
-                end = segment.get('end')
+                start = float(segment.get("start", 0.0))
+                end = segment.get("end")
                 segments.append(
                     {
-                        'start': start,
-                        'end': float(end) if end is not None else None,
+                        "start": start,
+                        "end": float(end) if end is not None else None,
                     }
                 )
 
         if not segments:
             return []
 
-        segments.sort(key=lambda item: item['start'])
+        segments.sort(key=lambda item: item["start"])
         merged = [segments[0]]
         for segment in segments[1:]:
             current = merged[-1]
-            current_end = float('inf') if current['end'] is None else current['end']
+            current_end = float("inf") if current["end"] is None else current["end"]
 
-            if segment['start'] <= current_end + 1.0:
-                current['end'] = None if current['end'] is None or segment['end'] is None else max(current['end'], segment['end'])
+            if segment["start"] <= current_end + 1.0:
+                current["end"] = (
+                    None if current["end"] is None or segment["end"] is None else max(current["end"], segment["end"])
+                )
             else:
                 merged.append(segment)
 
@@ -332,37 +334,37 @@ class RecognitionPipeline:
 
         for user_id, person in confirmed_people.items():
             person_keys = self._identity_tokens_for_person(user_id, person)
-            matched_groups = [group for group in groups if group['keys'] & person_keys]
+            matched_groups = [group for group in groups if group["keys"] & person_keys]
 
             if not matched_groups:
-                groups.append({'keys': set(person_keys), 'items': [(user_id, person)]})
+                groups.append({"keys": set(person_keys), "items": [(user_id, person)]})
                 continue
 
             primary_group = matched_groups[0]
-            primary_group['keys'].update(person_keys)
-            primary_group['items'].append((user_id, person))
+            primary_group["keys"].update(person_keys)
+            primary_group["items"].append((user_id, person))
 
             for duplicate_group in matched_groups[1:]:
-                primary_group['keys'].update(duplicate_group['keys'])
-                primary_group['items'].extend(duplicate_group['items'])
+                primary_group["keys"].update(duplicate_group["keys"])
+                primary_group["items"].extend(duplicate_group["items"])
                 groups.remove(duplicate_group)
 
         normalized = {}
         for group in groups:
-            items = group['items']
+            items = group["items"]
             people = [person for _, person in items]
             preferred_user_id, preferred_person = max(
                 items,
                 key=lambda entry: (
                     1 if entry[1].student_id else 0,
-                    1 if entry[1].current_status == 'present' else 0,
+                    1 if entry[1].current_status == "present" else 0,
                     float(entry[1].last_seen),
                 ),
             )
 
             canonical_user_id = preferred_person.student_id or preferred_user_id or preferred_person.label
             merged_segments = self._merge_presence_segments(people)
-            current_present_person = next((person for person in people if person.current_status == 'present'), None)
+            current_present_person = next((person for person in people if person.current_status == "present"), None)
 
             canonical_person = ConfirmedPerson(
                 user_id=canonical_user_id,
@@ -374,8 +376,10 @@ class RecognitionPipeline:
                 first_confirmed_at=min(float(person.first_confirmed_at) for person in people),
                 first_seen=min(float(person.first_seen) for person in people),
                 last_seen=max(float(person.last_seen) for person in people),
-                current_status='present' if current_present_person is not None else 'absent',
-                current_tracking_id=current_present_person.current_tracking_id if current_present_person is not None else None,
+                current_status="present" if current_present_person is not None else "absent",
+                current_tracking_id=current_present_person.current_tracking_id
+                if current_present_person is not None
+                else None,
                 bbox=current_present_person.bbox if current_present_person is not None else None,
                 presence_segments=merged_segments,
                 appearance_count=max(sum(int(person.appearance_count) for person in people), len(merged_segments)),
@@ -387,13 +391,13 @@ class RecognitionPipeline:
 
     def _push_announcement_locked(self, message):
         timestamp = time.time()
-        self._announcements.append({'message': message, 'timestamp': timestamp})
+        self._announcements.append({"message": message, "timestamp": timestamp})
         self._announcements = self._announcements[-8:]
-        self._status['announcement'] = message
+        self._status["announcement"] = message
 
     def set_attendance_mode(self, enabled):
         now = time.time()
-        self.kinect_service.set_processing_mode('attendance' if enabled else 'idle')
+        self.kinect_service.set_processing_mode("attendance" if enabled else "idle")
         with self._lock:
             self._attendance_mode = enabled
             if not enabled:
@@ -418,32 +422,32 @@ class RecognitionPipeline:
                 self._detector._cleanup_pose_fusion_tracks(now, reset=True)
                 self._metric_engine.reset()
                 for person in self._confirmed_people.values():
-                    if person.current_status == 'present':
+                    if person.current_status == "present":
                         self._set_confirmed_absent_locked(person, now)
                 self._save_presence_records_locked()
-                self._push_announcement_locked('課堂模式已停止。')
+                self._push_announcement_locked("課堂模式已停止。")
                 self._status.update(
                     {
-                        'status': 'idle',
-                        'message': '課堂模式尚未啟動。',
-                        'attendance_mode': False,
-                        'temporary_people': [],
-                        'confirmed_people': self._build_confirmed_payload_locked(
+                        "status": "idle",
+                        "message": "課堂模式尚未啟動。",
+                        "attendance_mode": False,
+                        "temporary_people": [],
+                        "confirmed_people": self._build_confirmed_payload_locked(
                             now,
                             include_presence_points=True,
                             include_metrics=False,
                         ),
-                        'students': self._build_confirmed_payload_locked(
+                        "students": self._build_confirmed_payload_locked(
                             now,
                             include_presence_points=True,
                             include_metrics=False,
                         ),
-                        'temporary_count': 0,
-                        'confirmed_present_count': 0,
-                        'confirmed_total_count': len(self._confirmed_people),
-                        'recognized_count': 0,
-                        'yolo_person_present': False,
-                        'detector_model': 'idle',
+                        "temporary_count": 0,
+                        "confirmed_present_count": 0,
+                        "confirmed_total_count": len(self._confirmed_people),
+                        "recognized_count": 0,
+                        "yolo_person_present": False,
+                        "detector_model": "idle",
                     }
                 )
             else:
@@ -469,7 +473,7 @@ class RecognitionPipeline:
                 self._metric_engine.reset()
                 # Start a fresh session timeline on each attendance start.
                 for person in self._confirmed_people.values():
-                    person.current_status = 'absent'
+                    person.current_status = "absent"
                     person.current_tracking_id = None
                     person.bbox = None
                     person.presence_segments = []
@@ -477,12 +481,12 @@ class RecognitionPipeline:
                     person.first_seen = now
                     person.last_seen = now
                 self._save_presence_records_locked()
-                self._push_announcement_locked('課堂模式已啟動。')
+                self._push_announcement_locked("課堂模式已啟動。")
                 self._status.update(
                     {
-                        'status': 'attendance_running',
-                        'message': '課堂模式啟動，開始進行課堂追蹤。',
-                        'attendance_mode': True,
+                        "status": "attendance_running",
+                        "message": "課堂模式啟動，開始進行課堂追蹤。",
+                        "attendance_mode": True,
                     }
                 )
         self._wake_event.set()
@@ -494,16 +498,16 @@ class RecognitionPipeline:
             return self._attendance_mode
 
     def set_current_course(self, course_id, course_name):
-        normalized_name = str(course_name or '').strip()
-        normalized_id = str(course_id or '').strip()
+        normalized_name = str(course_name or "").strip()
+        normalized_id = str(course_id or "").strip()
         if not normalized_name:
             normalized_name = normalized_id
         if not normalized_id:
             normalized_id = normalized_name
         with self._lock:
             self._current_course = {
-                'course_id': normalized_id,
-                'course_name': normalized_name,
+                "course_id": normalized_id,
+                "course_name": normalized_name,
             }
 
     def get_current_course(self):
@@ -513,66 +517,73 @@ class RecognitionPipeline:
     def get_latest_color_jpeg(self):
         with self._frame_lock:
             if not self._attendance_mode and self._annotated_jpeg is None:
-                return self.kinect_service.get_latest_jpeg('color')
-            return self._annotated_jpeg or self.kinect_service.get_latest_jpeg('color')
+                return self.kinect_service.get_latest_jpeg("color")
+            return self._annotated_jpeg or self.kinect_service.get_latest_jpeg("color")
 
     def get_latest_depth_jpeg(self):
         with self._frame_lock:
             if not self._attendance_mode and self._annotated_depth_jpeg is None:
-                return self.kinect_service.get_latest_jpeg('depth')
-            return self._annotated_depth_jpeg or self.kinect_service.get_latest_jpeg('depth')
+                return self.kinect_service.get_latest_jpeg("depth")
+            return self._annotated_depth_jpeg or self.kinect_service.get_latest_jpeg("depth")
 
     def get_status(self, include_metrics=True, metrics_user_id=None):
         with self._lock:
-            temporary_people = list(self._status.get('temporary_people') or [])
-            confirmed_people = list(self._status.get('confirmed_people') or [])
+            temporary_people = list(self._status.get("temporary_people") or [])
+            confirmed_people = list(self._status.get("confirmed_people") or [])
             if include_metrics:
-                requested_user_id = str(metrics_user_id or '').strip()
-                include_all_metrics = requested_user_id == ''
+                requested_user_id = str(metrics_user_id or "").strip()
+                include_all_metrics = requested_user_id == ""
                 confirmed_with_metrics = []
                 for item in confirmed_people:
                     copied_item = dict(item)
-                    copied_item['classroom_metrics'] = {}
-                    if include_all_metrics or str(copied_item.get('user_id') or '') == requested_user_id or str(copied_item.get('student_id') or '') == requested_user_id:
-                        metric_key = str(copied_item.get('user_id') or copied_item.get('student_id') or '').strip()
+                    copied_item["classroom_metrics"] = {}
+                    if (
+                        include_all_metrics
+                        or str(copied_item.get("user_id") or "") == requested_user_id
+                        or str(copied_item.get("student_id") or "") == requested_user_id
+                    ):
+                        metric_key = str(copied_item.get("user_id") or copied_item.get("student_id") or "").strip()
                         if metric_key:
-                            copied_item['classroom_metrics'] = self._metric_engine.get_user_metrics(metric_key)
+                            copied_item["classroom_metrics"] = self._metric_engine.get_user_metrics(metric_key)
                     confirmed_with_metrics.append(copied_item)
                 confirmed_people = confirmed_with_metrics
-            announcement = self._announcements[-1]['message'] if self._announcements else self._status['announcement']
+            announcement = self._announcements[-1]["message"] if self._announcements else self._status["announcement"]
             return {
-                'status': self._status['status'],
-                'message': self._status['message'],
-                'attendance_mode': self._attendance_mode,
-                'temporary_people': temporary_people,
-                'confirmed_people': confirmed_people,
-                'students': confirmed_people,
-                'temporary_count': int(self._status.get('temporary_count') or len(temporary_people)),
-                'confirmed_present_count': int(self._status.get('confirmed_present_count') or 0),
-                'confirmed_total_count': int(self._status.get('confirmed_total_count') or len(confirmed_people)),
-                'recognized_count': int(self._status.get('recognized_count') or 0),
-                'yolo_person_present': self._status['yolo_person_present'],
-                'detector_model': self._status['detector_model'],
-                'announcement': announcement,
-                'current_course': dict(self._current_course),
+                "status": self._status["status"],
+                "message": self._status["message"],
+                "attendance_mode": self._attendance_mode,
+                "temporary_people": temporary_people,
+                "confirmed_people": confirmed_people,
+                "students": confirmed_people,
+                "temporary_count": int(self._status.get("temporary_count") or len(temporary_people)),
+                "confirmed_present_count": int(self._status.get("confirmed_present_count") or 0),
+                "confirmed_total_count": int(self._status.get("confirmed_total_count") or len(confirmed_people)),
+                "recognized_count": int(self._status.get("recognized_count") or 0),
+                "yolo_person_present": self._status["yolo_person_present"],
+                "detector_model": self._status["detector_model"],
+                "announcement": announcement,
+                "current_course": dict(self._current_course),
             }
 
     def confirm_temporary_person(self, temp_id):
         with self._lock:
             if not self._attendance_mode:
-                return {'status': 'error', 'message': '請先開始課堂。'}
+                return {"status": "error", "message": "請先開始課堂。"}
 
             temp_person = self._temporary_people.get(temp_id)
             if temp_person is None:
-                return {'status': 'error', 'message': '找不到這位暫時學生，可能已離開畫面。'}
+                return {"status": "error", "message": "找不到這位暫時學生，可能已離開畫面。"}
 
             bbox = list(temp_person.bbox)
             cached_embedding = None
             cached_bbox = list(temp_person.face_bbox) if temp_person.face_bbox else list(bbox)
-            if temp_person.face_embedding and (time.time() - float(temp_person.face_embedding_at)) <= self.FACE_EMBEDDING_CACHE_SECONDS:
+            if (
+                temp_person.face_embedding
+                and (time.time() - float(temp_person.face_embedding_at)) <= self.FACE_EMBEDDING_CACHE_SECONDS
+            ):
                 cached_embedding = list(temp_person.face_embedding)
-            temp_person.confirm_status = 'processing'
-            temp_person.confirm_message = '辨識中...'
+            temp_person.confirm_status = "processing"
+            temp_person.confirm_message = "辨識中..."
 
         embedding = cached_embedding
         if embedding is None:
@@ -581,21 +592,21 @@ class RecognitionPipeline:
                 with self._lock:
                     temp_person = self._temporary_people.get(temp_id)
                     if temp_person is not None:
-                        temp_person.confirm_status = 'failed'
-                        temp_person.confirm_message = '目前沒有可用影像。'
-                return {'status': 'error', 'message': '目前沒有可用影像。'}
+                        temp_person.confirm_status = "failed"
+                        temp_person.confirm_message = "目前沒有可用影像。"
+                return {"status": "error", "message": "目前沒有可用影像。"}
 
             analysis = self._detector._analyze_face_inside_bbox_fast(frame, bbox)
-            if analysis['status'] != 'ok':
+            if analysis["status"] != "ok":
                 with self._lock:
                     temp_person = self._temporary_people.get(temp_id)
                     if temp_person is not None:
-                        temp_person.confirm_status = 'failed'
-                        temp_person.confirm_message = analysis['message']
-                return {'status': 'error', 'message': analysis['message']}
+                        temp_person.confirm_status = "failed"
+                        temp_person.confirm_message = analysis["message"]
+                return {"status": "error", "message": analysis["message"]}
 
-            embedding = analysis['embedding']
-            cached_bbox = list(analysis['bbox'])
+            embedding = analysis["embedding"]
+            cached_bbox = list(analysis["bbox"])
 
         matches = self.face_db.match_embedding(
             embedding,
@@ -605,34 +616,34 @@ class RecognitionPipeline:
             with self._lock:
                 temp_person = self._temporary_people.get(temp_id)
                 if temp_person is not None:
-                    temp_person.confirm_status = 'failed'
-                    temp_person.confirm_message = '找不到對應身份。'
-            return {'status': 'error', 'message': '找不到對應身份。'}
+                    temp_person.confirm_status = "failed"
+                    temp_person.confirm_message = "找不到對應身份。"
+            return {"status": "error", "message": "找不到對應身份。"}
 
         now = time.time()
         with self._lock:
             temp_person = self._temporary_people.get(temp_id)
             if temp_person is None:
-                return {'status': 'error', 'message': '這位暫時學生已離開畫面。'}
+                return {"status": "error", "message": "這位暫時學生已離開畫面。"}
 
             temp_person.face_bbox = list(cached_bbox)
             temp_person.face_embedding = list(embedding)
             temp_person.face_embedding_at = now
             confirmed_person = self._promote_temporary_to_confirmed_locked(temp_id, matches[0], now)
             if confirmed_person is None:
-                return {'status': 'error', 'message': '辨識對象已不存在。'}
+                return {"status": "error", "message": "辨識對象已不存在。"}
 
             self._session_confirmed_ids.add(confirmed_person.user_id)
-            self._push_announcement_locked(f'{confirmed_person.name} 已完成身份確認。')
+            self._push_announcement_locked(f"{confirmed_person.name} 已完成身份確認。")
             self._update_summary_locked(now, force=True)
 
         return {
-            'status': 'confirmed',
-            'message': f'{confirmed_person.name} 已完成身份確認。',
-            'person': {
-                'user_id': confirmed_person.user_id,
-                'display_name': confirmed_person.name,
-                'student_id': confirmed_person.student_id,
+            "status": "confirmed",
+            "message": f"{confirmed_person.name} 已完成身份確認。",
+            "person": {
+                "user_id": confirmed_person.user_id,
+                "display_name": confirmed_person.name,
+                "student_id": confirmed_person.student_id,
             },
         }
 
@@ -646,12 +657,12 @@ class RecognitionPipeline:
             with self._lock:
                 temp_person = self._temporary_people.get(temp_id)
                 if temp_person is None or not temp_person.bbox:
-                    raise RuntimeError('Temporary student is no longer available.')
+                    raise RuntimeError("Temporary student is no longer available.")
                 bbox = list(temp_person.bbox)
 
             frame = self.kinect_service.get_latest_color_frame()
             if frame is None:
-                raise RuntimeError('Unable to capture a Kinect frame.')
+                raise RuntimeError("Unable to capture a Kinect frame.")
 
             frames.append(self._detector.crop_face_for_training(frame, bbox))
 
@@ -660,17 +671,17 @@ class RecognitionPipeline:
     def begin_confirm_temporary_person(self, temp_id):
         with self._lock:
             if not self._attendance_mode:
-                return {'status': 'error', 'message': '課堂模式尚未啟動。'}
+                return {"status": "error", "message": "課堂模式尚未啟動。"}
 
             temp_person = self._temporary_people.get(temp_id)
             if temp_person is None:
-                return {'status': 'error', 'message': 'Temporary student not found.'}
+                return {"status": "error", "message": "Temporary student not found."}
 
-            if temp_person.confirm_status == 'processing':
-                return {'status': 'queued', 'message': 'Identity check already in progress.', 'temp_id': temp_id}
+            if temp_person.confirm_status == "processing":
+                return {"status": "queued", "message": "Identity check already in progress.", "temp_id": temp_id}
 
-            temp_person.confirm_status = 'processing'
-            temp_person.confirm_message = '辨識中...'
+            temp_person.confirm_status = "processing"
+            temp_person.confirm_message = "辨識中..."
             temp_person.last_seen = time.time()
             self._update_summary_locked(time.time(), force=True)
 
@@ -679,7 +690,7 @@ class RecognitionPipeline:
             args=(temp_id,),
             daemon=True,
         ).start()
-        return {'status': 'queued', 'message': 'Identity check started.', 'temp_id': temp_id}
+        return {"status": "queued", "message": "Identity check started.", "temp_id": temp_id}
 
     def _confirm_temporary_person_worker(self, temp_id):
         with self._lock:
@@ -689,7 +700,10 @@ class RecognitionPipeline:
             bbox = list(temp_person.bbox)
             cached_embedding = None
             cached_bbox = list(temp_person.face_bbox) if temp_person.face_bbox else list(bbox)
-            if temp_person.face_embedding and (time.time() - float(temp_person.face_embedding_at)) <= self.FACE_EMBEDDING_CACHE_SECONDS:
+            if (
+                temp_person.face_embedding
+                and (time.time() - float(temp_person.face_embedding_at)) <= self.FACE_EMBEDDING_CACHE_SECONDS
+            ):
                 cached_embedding = list(temp_person.face_embedding)
 
         embedding = cached_embedding
@@ -699,23 +713,23 @@ class RecognitionPipeline:
                 with self._lock:
                     temp_person = self._temporary_people.get(temp_id)
                     if temp_person is not None:
-                        temp_person.confirm_status = 'failed'
-                        temp_person.confirm_message = '目前無法取得 Kinect 畫面。'
+                        temp_person.confirm_status = "failed"
+                        temp_person.confirm_message = "目前無法取得 Kinect 畫面。"
                         self._update_summary_locked(time.time(), force=True)
                 return
 
             analysis = self._detector._analyze_face_inside_bbox_fast(frame, bbox)
-            if analysis['status'] != 'ok':
+            if analysis["status"] != "ok":
                 with self._lock:
                     temp_person = self._temporary_people.get(temp_id)
                     if temp_person is not None:
-                        temp_person.confirm_status = 'failed'
-                        temp_person.confirm_message = analysis['message']
+                        temp_person.confirm_status = "failed"
+                        temp_person.confirm_message = analysis["message"]
                         self._update_summary_locked(time.time(), force=True)
                 return
 
-            embedding = analysis['embedding']
-            cached_bbox = list(analysis['bbox'])
+            embedding = analysis["embedding"]
+            cached_bbox = list(analysis["bbox"])
 
         matches = self.face_db.match_embedding(
             embedding,
@@ -725,8 +739,8 @@ class RecognitionPipeline:
             with self._lock:
                 temp_person = self._temporary_people.get(temp_id)
                 if temp_person is not None:
-                    temp_person.confirm_status = 'failed'
-                    temp_person.confirm_message = '找不到符合的人臉資料。'
+                    temp_person.confirm_status = "failed"
+                    temp_person.confirm_message = "找不到符合的人臉資料。"
                     self._update_summary_locked(time.time(), force=True)
             return
 
@@ -744,7 +758,7 @@ class RecognitionPipeline:
                 return
 
             self._session_confirmed_ids.add(confirmed_person.user_id)
-            self._push_announcement_locked(f'{confirmed_person.name} 已完成身份確認。')
+            self._push_announcement_locked(f"{confirmed_person.name} 已完成身份確認。")
             self._update_summary_locked(now, force=True)
 
     def capture_temporary_person_frame(self, temp_id):
@@ -753,30 +767,30 @@ class RecognitionPipeline:
     def register_temporary_person(self, temp_id, profile):
         now = time.time()
         synthetic_match = {
-            'label': profile['label'],
-            'display_name': profile.get('name', profile['label']),
-            'student_id': profile.get('student_id', ''),
-            'department': profile.get('department', ''),
-            'title': profile.get('title', ''),
-            'similarity': 1.0,
+            "label": profile["label"],
+            "display_name": profile.get("name", profile["label"]),
+            "student_id": profile.get("student_id", ""),
+            "department": profile.get("department", ""),
+            "title": profile.get("title", ""),
+            "similarity": 1.0,
         }
 
         with self._lock:
             confirmed_person = self._promote_temporary_to_confirmed_locked(temp_id, synthetic_match, now)
             if confirmed_person is None:
-                raise RuntimeError('Unable to register this temporary student.')
+                raise RuntimeError("Unable to register this temporary student.")
             self._session_confirmed_ids.add(confirmed_person.user_id)
-            self._push_announcement_locked(f'{confirmed_person.name} 已加入班級。')
+            self._push_announcement_locked(f"{confirmed_person.name} 已加入班級。")
             self._update_summary_locked(now, force=True)
 
         return {
-            'status': 'confirmed',
-            'message': f'{confirmed_person.name} 已完成加選並建立身份。',
-            'person': {
-                'user_id': confirmed_person.user_id,
-                'display_name': confirmed_person.name,
-                'student_id': confirmed_person.student_id,
-                'label': confirmed_person.label,
+            "status": "confirmed",
+            "message": f"{confirmed_person.name} 已完成加選並建立身份。",
+            "person": {
+                "user_id": confirmed_person.user_id,
+                "display_name": confirmed_person.name,
+                "student_id": confirmed_person.student_id,
+                "label": confirmed_person.label,
             },
         }
 
@@ -784,10 +798,10 @@ class RecognitionPipeline:
         last_token = None
         try:
             while True:
-                payload, token = self._get_stream_payload_and_token('color')
+                payload, token = self._get_stream_payload_and_token("color")
                 if payload is not None and token != last_token:
                     last_token = token
-                    yield b'--frame\r\nContent-Type: image/jpeg\r\n\r\n' + payload + b'\r\n'
+                    yield b"--frame\r\nContent-Type: image/jpeg\r\n\r\n" + payload + b"\r\n"
                 time.sleep(0.01)
         except GeneratorExit:
             pass
@@ -796,10 +810,10 @@ class RecognitionPipeline:
         last_token = None
         try:
             while True:
-                payload, token = self._get_stream_payload_and_token('depth')
+                payload, token = self._get_stream_payload_and_token("depth")
                 if payload is not None and token != last_token:
                     last_token = token
-                    yield b'--frame\r\nContent-Type: image/jpeg\r\n\r\n' + payload + b'\r\n'
+                    yield b"--frame\r\nContent-Type: image/jpeg\r\n\r\n" + payload + b"\r\n"
                 time.sleep(0.01)
         except GeneratorExit:
             pass
@@ -812,26 +826,26 @@ class RecognitionPipeline:
             depth_payload = self._annotated_depth_jpeg
             has_annotated_pair = in_attendance_mode and color_payload is not None and depth_payload is not None
             if has_annotated_pair:
-                payload = color_payload if kind == 'color' else depth_payload
-                return payload, ('attendance', render_seq)
+                payload = color_payload if kind == "color" else depth_payload
+                return payload, ("attendance", render_seq)
 
         fallback_payload = self.kinect_service.get_latest_jpeg(kind)
         marker = self.kinect_service.get_latest_frame_marker()
-        fallback_seq = int(marker.get('frame_seq') or 0)
-        return fallback_payload, ('raw', fallback_seq)
+        fallback_seq = int(marker.get("frame_seq") or 0)
+        return fallback_payload, ("raw", fallback_seq)
 
     def _encode_frame(self, frame):
         cv2, _ = self._get_cv_modules()
         prepared_frame = frame
         max_width = max(0, int(self.STREAM_PREVIEW_MAX_WIDTH))
-        if max_width and frame is not None and getattr(frame, 'shape', None) is not None:
+        if max_width and frame is not None and getattr(frame, "shape", None) is not None:
             frame_width = int(frame.shape[1]) if len(frame.shape) >= 2 else 0
             if frame_width > max_width:
                 scale = max_width / float(frame_width)
                 target_height = max(1, int(round(frame.shape[0] * scale)))
                 prepared_frame = cv2.resize(frame, (max_width, target_height), interpolation=cv2.INTER_AREA)
         ok, buffer = cv2.imencode(
-            '.jpg',
+            ".jpg",
             prepared_frame,
             [
                 int(cv2.IMWRITE_JPEG_QUALITY),
@@ -841,10 +855,6 @@ class RecognitionPipeline:
         if not ok:
             return None
         return buffer.tobytes()
-
-
-
-
 
     def _update_classroom_metrics_locked(self, frame_shape, depth_frame, now, force=False):
         if not force and now < (self._last_metrics_update_at + self.METRIC_UPDATE_INTERVAL):
@@ -856,7 +866,7 @@ class RecognitionPipeline:
         confirmed_present_people = [
             person
             for person in self._confirmed_people.values()
-            if person.current_status == 'present' and person.bbox is not None
+            if person.current_status == "present" and person.bbox is not None
         ]
         if not confirmed_present_people:
             return
@@ -877,18 +887,14 @@ class RecognitionPipeline:
             if detection is not None:
                 used_detection_indexes.add(detection_index)
             else:
-                detection = {'bbox': person.bbox, 'keypoints': [], 'keypoint_conf': []}
+                detection = {"bbox": person.bbox, "keypoints": [], "keypoint_conf": []}
 
             matched_detection_by_user[person.user_id] = detection
-            centers_by_user[person.user_id] = self._detector._bbox_center(detection.get('bbox', person.bbox))
+            centers_by_user[person.user_id] = self._detector._bbox_center(detection.get("bbox", person.bbox))
 
         for person in confirmed_present_people:
-            detection = matched_detection_by_user.get(person.user_id, {'bbox': person.bbox})
-            peer_centers = [
-                center
-                for user_id, center in centers_by_user.items()
-                if user_id != person.user_id
-            ]
+            detection = matched_detection_by_user.get(person.user_id, {"bbox": person.bbox})
+            peer_centers = [center for user_id, center in centers_by_user.items() if user_id != person.user_id]
             self._metric_engine.update_student(
                 user_id=person.user_id,
                 frame_shape=frame_shape,
@@ -904,14 +910,14 @@ class RecognitionPipeline:
         if not pose_detection:
             return
 
-        keypoints = pose_detection.get('keypoints') or []
-        keypoint_conf = pose_detection.get('keypoint_conf') or []
+        keypoints = pose_detection.get("keypoints") or []
+        keypoint_conf = pose_detection.get("keypoint_conf") or []
         if not keypoints:
             return
 
         cv2, _ = self._get_cv_modules()
         if bbox is None:
-            bbox = pose_detection.get('bbox')
+            bbox = pose_detection.get("bbox")
         bbox_side = max(120.0, self._detector._bbox_max_side(bbox)) if bbox is not None else 180.0
         line_thickness = max(3, min(7, int(round(bbox_side / 135.0))))
         line_shadow_thickness = line_thickness + 2
@@ -948,11 +954,11 @@ class RecognitionPipeline:
     def _build_entity_index_locked(self):
         entities = []
         for person in self._temporary_people.values():
-            if person.current_status == 'tracking':
-                entities.append(('temporary', person.temp_id, person.bbox))
+            if person.current_status == "tracking":
+                entities.append(("temporary", person.temp_id, person.bbox))
         for person in self._confirmed_people.values():
-            if person.current_status == 'present' and person.bbox is not None:
-                entities.append(('confirmed', person.user_id, person.bbox))
+            if person.current_status == "present" and person.bbox is not None:
+                entities.append(("confirmed", person.user_id, person.bbox))
         return entities
 
     def _temporary_boxes_conflict_locked(self, left_bbox, right_bbox):
@@ -972,7 +978,7 @@ class RecognitionPipeline:
         ordered_people = sorted(
             self._temporary_people.values(),
             key=lambda item: (
-                item.confirm_status == 'processing',
+                item.confirm_status == "processing",
                 item.last_seen,
                 self._detector._current_bbox_area(item.bbox),
             ),
@@ -991,11 +997,11 @@ class RecognitionPipeline:
         self._temporary_people = {person.temp_id: person for person in kept_people}
 
     def _renumber_temporary_people_locked(self):
-        student_prefix = f'{chr(0x5B78)}{chr(0x751F)}'
+        student_prefix = f"{chr(0x5B78)}{chr(0x751F)}"
         used_slots = {
             int(person.slot_number)
             for person in self._temporary_people.values()
-            if int(getattr(person, 'slot_number', 0) or 0) > 0
+            if int(getattr(person, "slot_number", 0) or 0) > 0
         }
 
         for person in sorted(
@@ -1006,18 +1012,18 @@ class RecognitionPipeline:
                 item.temp_id,
             ),
         ):
-            slot = int(getattr(person, 'slot_number', 0) or 0)
+            slot = int(getattr(person, "slot_number", 0) or 0)
             if slot <= 0:
                 slot = self._allocate_temporary_slot_locked()
                 person.slot_number = slot
                 used_slots.add(slot)
-            person.display_name = f'{student_prefix}{slot:06d}'
+            person.display_name = f"{student_prefix}{slot:06d}"
 
     def _allocate_temporary_slot_locked(self):
         used_slots = {
             int(person.slot_number)
             for person in self._temporary_people.values()
-            if int(getattr(person, 'slot_number', 0) or 0) > 0
+            if int(getattr(person, "slot_number", 0) or 0) > 0
         }
         candidate = 1
         while candidate in used_slots:
@@ -1027,10 +1033,10 @@ class RecognitionPipeline:
     def _create_temporary_person_locked(self, bbox, now):
         temp_number = self._next_temp_number
         self._next_temp_number += 1
-        temp_id = f'temp-{temp_number}'
+        temp_id = f"temp-{temp_number}"
         person = TemporaryPerson(
             temp_id=temp_id,
-            display_name='',
+            display_name="",
             bbox=bbox,
             tracking_id=self._next_tracking_id,
             slot_number=self._allocate_temporary_slot_locked(),
@@ -1040,24 +1046,24 @@ class RecognitionPipeline:
         self._next_tracking_id += 1
         self._temporary_people[temp_id] = person
         self._renumber_temporary_people_locked()
-        self._push_announcement_locked(f'{person.display_name} 已進入畫面。')
+        self._push_announcement_locked(f"{person.display_name} 已進入畫面。")
 
     def _set_confirmed_present_locked(self, person, tracking_id, bbox, now):
-        if person.current_status != 'present':
-            person.presence_segments.append({'start': now, 'end': None})
+        if person.current_status != "present":
+            person.presence_segments.append({"start": now, "end": None})
             person.appearance_count += 1
-        person.current_status = 'present'
+        person.current_status = "present"
         person.current_tracking_id = tracking_id
         person.bbox = bbox
         person.last_seen = now
 
     def _set_confirmed_absent_locked(self, person, now):
-        if person.current_status == 'present':
+        if person.current_status == "present":
             for segment in reversed(person.presence_segments):
-                if segment['end'] is None:
-                    segment['end'] = now
+                if segment["end"] is None:
+                    segment["end"] = now
                     break
-        person.current_status = 'absent'
+        person.current_status = "absent"
         person.current_tracking_id = None
         person.bbox = None
         person.last_seen = now
@@ -1084,12 +1090,12 @@ class RecognitionPipeline:
             matched_entities.add((entity_kind, entity_id))
             bbox = person_boxes[detection_index]
 
-            if entity_kind == 'temporary':
+            if entity_kind == "temporary":
                 person = self._temporary_people.get(entity_id)
                 if person is not None:
                     person.bbox = bbox
                     person.last_seen = now
-                    person.current_status = 'tracking'
+                    person.current_status = "tracking"
             else:
                 person = self._confirmed_people.get(entity_id)
                 if person is not None:
@@ -1100,10 +1106,10 @@ class RecognitionPipeline:
 
         active_entity_boxes = []
         for person in self._temporary_people.values():
-            if person.current_status == 'tracking' and person.bbox is not None:
+            if person.current_status == "tracking" and person.bbox is not None:
                 active_entity_boxes.append(list(person.bbox))
         for person in self._confirmed_people.values():
-            if person.current_status == 'present' and person.bbox is not None:
+            if person.current_status == "present" and person.bbox is not None:
                 active_entity_boxes.append(list(person.bbox))
 
         for detection_index, bbox in enumerate(person_boxes):
@@ -1127,7 +1133,7 @@ class RecognitionPipeline:
         stale_temporary_ids = [
             temp_id
             for temp_id, person in self._temporary_people.items()
-            if person.confirm_status != 'processing' and now - person.last_seen > self.TEMP_PERSON_TIMEOUT
+            if person.confirm_status != "processing" and now - person.last_seen > self.TEMP_PERSON_TIMEOUT
         ]
         for temp_id in stale_temporary_ids:
             self._temporary_people.pop(temp_id, None)
@@ -1139,9 +1145,9 @@ class RecognitionPipeline:
 
         save_needed = False
         for person in self._confirmed_people.values():
-            if person.current_status == 'present' and now - person.last_seen > self.CONFIRMED_ABSENT_TIMEOUT:
+            if person.current_status == "present" and now - person.last_seen > self.CONFIRMED_ABSENT_TIMEOUT:
                 self._set_confirmed_absent_locked(person, now)
-                self._push_announcement_locked(f'{person.name} 已離開畫面。')
+                self._push_announcement_locked(f"{person.name} 已離開畫面。")
                 save_needed = True
 
         if save_needed:
@@ -1157,31 +1163,31 @@ class RecognitionPipeline:
         y2 = min(height, int(bbox[3] + pad_y))
         crop = frame[y1:y2, x1:x2]
         if crop.size == 0:
-            return {'status': 'no_face', 'message': '無法從該學生區域擷取臉部畫面。'}
+            return {"status": "no_face", "message": "無法從該學生區域擷取臉部畫面。"}
 
         analysis = self.face_db.analyze_faces(crop)
-        if analysis['status'] != 'ok' or not analysis['faces']:
-            return {'status': analysis['status'], 'message': analysis['message']}
+        if analysis["status"] != "ok" or not analysis["faces"]:
+            return {"status": analysis["status"], "message": analysis["message"]}
 
-        best_face = max(analysis['faces'], key=lambda item: self._detector._current_bbox_area(item['bbox']))
+        best_face = max(analysis["faces"], key=lambda item: self._detector._current_bbox_area(item["bbox"]))
         face_bbox = [
-            best_face['bbox'][0] + x1,
-            best_face['bbox'][1] + y1,
-            best_face['bbox'][2] + x1,
-            best_face['bbox'][3] + y1,
+            best_face["bbox"][0] + x1,
+            best_face["bbox"][1] + y1,
+            best_face["bbox"][2] + x1,
+            best_face["bbox"][3] + y1,
         ]
         return {
-            'status': 'ok',
-            'message': 'Face detected inside the selected person box.',
-            'bbox': face_bbox,
-            'embedding': best_face['embedding'],
+            "status": "ok",
+            "message": "Face detected inside the selected person box.",
+            "bbox": face_bbox,
+            "embedding": best_face["embedding"],
         }
 
     def _calculate_total_presence_locked(self, person, now):
         total = 0.0
         for segment in person.presence_segments:
-            segment_start = float(segment['start'])
-            segment_end = float(segment['end'] if segment['end'] is not None else now)
+            segment_start = float(segment["start"])
+            segment_end = float(segment["end"] if segment["end"] is not None else now)
             total += max(0.0, segment_end - segment_start)
         return total
 
@@ -1191,8 +1197,8 @@ class RecognitionPipeline:
 
         segments = []
         for segment in person.presence_segments:
-            segment_start = float(segment['start'])
-            segment_end = float(segment['end'] if segment['end'] is not None else now)
+            segment_start = float(segment["start"])
+            segment_end = float(segment["end"] if segment["end"] is not None else now)
             segments.append((segment_start, segment_end))
 
         window_start = max(float(person.first_confirmed_at), float(now) - self.PRESENCE_WINDOW_SECONDS)
@@ -1201,12 +1207,12 @@ class RecognitionPipeline:
 
         while sample_time <= now:
             is_present = any(segment_start <= sample_time <= segment_end for segment_start, segment_end in segments)
-            points.append({'t': sample_time, 'v': 1 if is_present else 0})
+            points.append({"t": sample_time, "v": 1 if is_present else 0})
             sample_time += self.PRESENCE_SAMPLE_INTERVAL
 
-        if not points or points[-1]['t'] < now:
+        if not points or points[-1]["t"] < now:
             is_present = any(segment_start <= now <= segment_end for segment_start, segment_end in segments)
-            points.append({'t': now, 'v': 1 if is_present else 0})
+            points.append({"t": now, "v": 1 if is_present else 0})
         return points
 
     def _build_temporary_payload_locked(self, now):
@@ -1214,31 +1220,33 @@ class RecognitionPipeline:
         for person in sorted(
             self._temporary_people.values(),
             key=lambda item: (
-                1 if int(getattr(item, 'slot_number', 0) or 0) <= 0 else 0,
-                int(getattr(item, 'slot_number', 0) or 0),
-                str(getattr(item, 'display_name', '') or '').lower(),
-                float(getattr(item, 'first_seen', 0.0)),
+                1 if int(getattr(item, "slot_number", 0) or 0) <= 0 else 0,
+                int(getattr(item, "slot_number", 0) or 0),
+                str(getattr(item, "display_name", "") or "").lower(),
+                float(getattr(item, "first_seen", 0.0)),
             ),
         ):
             payload.append(
                 {
-                    'temp_id': person.temp_id,
-                    'display_name': person.display_name,
-                    'tracking_id': person.tracking_id,
-                    'current_status': person.current_status,
-                    'first_seen': person.first_seen,
-                    'last_seen': person.last_seen,
-                    'presence_time': now - person.first_seen,
-                    'confirm_status': person.confirm_status,
-                    'confirm_message': person.confirm_message,
+                    "temp_id": person.temp_id,
+                    "display_name": person.display_name,
+                    "tracking_id": person.tracking_id,
+                    "current_status": person.current_status,
+                    "first_seen": person.first_seen,
+                    "last_seen": person.last_seen,
+                    "presence_time": now - person.first_seen,
+                    "confirm_status": person.confirm_status,
+                    "confirm_message": person.confirm_message,
                 }
             )
         return payload
 
-    def _build_confirmed_payload_locked(self, now, include_presence_points=True, include_metrics=True, metrics_user_id=None):
+    def _build_confirmed_payload_locked(
+        self, now, include_presence_points=True, include_metrics=True, metrics_user_id=None
+    ):
         def _confirmed_sort_key(person):
-            student_id = str(getattr(person, 'student_id', '') or '').strip()
-            digits = ''.join(char for char in student_id if char.isdigit())
+            student_id = str(getattr(person, "student_id", "") or "").strip()
+            digits = "".join(char for char in student_id if char.isdigit())
             if digits:
                 try:
                     sequence = int(digits)
@@ -1248,49 +1256,51 @@ class RecognitionPipeline:
                     0,
                     sequence,
                     student_id.lower(),
-                    str(getattr(person, 'name', '') or '').lower(),
+                    str(getattr(person, "name", "") or "").lower(),
                 )
             return (
                 1,
-                str(getattr(person, 'name', '') or '').lower(),
+                str(getattr(person, "name", "") or "").lower(),
                 student_id.lower(),
-                str(getattr(person, 'user_id', '') or '').lower(),
+                str(getattr(person, "user_id", "") or "").lower(),
             )
 
         payload = []
         for person in sorted(self._confirmed_people.values(), key=_confirmed_sort_key):
             total_presence_time = self._calculate_total_presence_locked(person, now)
-            average_stay_time = (
-                total_presence_time / person.appearance_count if person.appearance_count else 0.0
-            )
+            average_stay_time = total_presence_time / person.appearance_count if person.appearance_count else 0.0
             include_metrics_for_person = bool(include_metrics) and (
                 metrics_user_id is None
-                or str(metrics_user_id) == ''
+                or str(metrics_user_id) == ""
                 or str(person.user_id) == str(metrics_user_id)
                 or str(person.student_id) == str(metrics_user_id)
             )
             payload.append(
                 {
-                    'user_id': person.user_id,
-                    'label': person.label,
-                    'display_name': person.name,
-                    'name': person.name,
-                    'student_id': person.student_id,
-                    'department': person.department,
-                    'title': person.title,
-                    'current_status': person.current_status,
-                    'first_confirmed_at': person.first_confirmed_at,
-                    'first_seen': person.first_seen,
-                    'last_seen': person.last_seen,
-                    'total_presence_time': total_presence_time,
-                    'appearance_count': person.appearance_count,
-                    'average_stay_time': average_stay_time,
-                    'presence_segments': person.presence_segments,
-                    'presence_points': self._build_presence_points_locked(person, now) if include_presence_points else [],
-                    'last_similarity': person.last_similarity,
-                    'current_tracking_id': person.current_tracking_id,
-                    'session_visible': person.user_id in self._session_confirmed_ids,
-                    'classroom_metrics': self._metric_engine.get_user_metrics(person.user_id) if include_metrics_for_person else {},
+                    "user_id": person.user_id,
+                    "label": person.label,
+                    "display_name": person.name,
+                    "name": person.name,
+                    "student_id": person.student_id,
+                    "department": person.department,
+                    "title": person.title,
+                    "current_status": person.current_status,
+                    "first_confirmed_at": person.first_confirmed_at,
+                    "first_seen": person.first_seen,
+                    "last_seen": person.last_seen,
+                    "total_presence_time": total_presence_time,
+                    "appearance_count": person.appearance_count,
+                    "average_stay_time": average_stay_time,
+                    "presence_segments": person.presence_segments,
+                    "presence_points": self._build_presence_points_locked(person, now)
+                    if include_presence_points
+                    else [],
+                    "last_similarity": person.last_similarity,
+                    "current_tracking_id": person.current_tracking_id,
+                    "session_visible": person.user_id in self._session_confirmed_ids,
+                    "classroom_metrics": self._metric_engine.get_user_metrics(person.user_id)
+                    if include_metrics_for_person
+                    else {},
                 }
             )
         return payload
@@ -1304,9 +1314,11 @@ class RecognitionPipeline:
         confirmed_person = self._confirmed_people.get(user_id)
         if confirmed_person is None:
             for existing_user_id, existing_person in list(self._confirmed_people.items()):
-                same_label = bool(match.get('label')) and existing_person.label == match.get('label')
-                same_student_id = bool(match.get('student_id')) and existing_person.student_id == match.get('student_id')
-                same_name = bool(match.get('display_name')) and existing_person.name == match.get('display_name')
+                same_label = bool(match.get("label")) and existing_person.label == match.get("label")
+                same_student_id = bool(match.get("student_id")) and existing_person.student_id == match.get(
+                    "student_id"
+                )
+                same_name = bool(match.get("display_name")) and existing_person.name == match.get("display_name")
                 if same_label or same_student_id or same_name:
                     confirmed_person = existing_person
                     if existing_user_id != user_id:
@@ -1318,30 +1330,30 @@ class RecognitionPipeline:
         if confirmed_person is None:
             confirmed_person = ConfirmedPerson(
                 user_id=user_id,
-                label=match['label'],
-                name=match.get('display_name', match['label']),
-                student_id=match.get('student_id', ''),
-                department=match.get('department', ''),
-                title=match.get('title', ''),
+                label=match["label"],
+                name=match.get("display_name", match["label"]),
+                student_id=match.get("student_id", ""),
+                department=match.get("department", ""),
+                title=match.get("title", ""),
                 first_confirmed_at=now,
                 first_seen=temp_person.first_seen,
                 last_seen=now,
-                current_status='present',
+                current_status="present",
                 current_tracking_id=temp_person.tracking_id,
                 bbox=temp_person.bbox,
-                presence_segments=[{'start': now, 'end': None}],
+                presence_segments=[{"start": now, "end": None}],
                 appearance_count=1,
-                last_similarity=float(match['similarity']),
+                last_similarity=float(match["similarity"]),
             )
             self._confirmed_people[user_id] = confirmed_person
         else:
-            confirmed_person.label = match['label']
-            confirmed_person.name = match.get('display_name', confirmed_person.name)
-            confirmed_person.student_id = match.get('student_id', confirmed_person.student_id)
-            confirmed_person.department = match.get('department', confirmed_person.department)
-            confirmed_person.title = match.get('title', confirmed_person.title)
+            confirmed_person.label = match["label"]
+            confirmed_person.name = match.get("display_name", confirmed_person.name)
+            confirmed_person.student_id = match.get("student_id", confirmed_person.student_id)
+            confirmed_person.department = match.get("department", confirmed_person.department)
+            confirmed_person.title = match.get("title", confirmed_person.title)
             confirmed_person.first_seen = min(confirmed_person.first_seen, temp_person.first_seen)
-            confirmed_person.last_similarity = float(match['similarity'])
+            confirmed_person.last_similarity = float(match["similarity"])
             self._set_confirmed_present_locked(
                 confirmed_person,
                 temp_person.tracking_id,
@@ -1355,9 +1367,7 @@ class RecognitionPipeline:
 
     def _try_auto_relink_locked(self, frame, now):
         absent_confirmed_ids = {
-            user_id
-            for user_id, person in self._confirmed_people.items()
-            if person.current_status == 'absent'
+            user_id for user_id, person in self._confirmed_people.items() if person.current_status == "absent"
         }
         if not absent_confirmed_ids:
             return
@@ -1374,14 +1384,14 @@ class RecognitionPipeline:
             temp_person.last_auto_relink_at = now
             face_checks += 1
             analysis = self._detector._analyze_face_inside_bbox_fast(frame, temp_person.bbox)
-            if analysis['status'] != 'ok':
+            if analysis["status"] != "ok":
                 continue
 
-            temp_person.face_bbox = list(analysis['bbox'])
-            temp_person.face_embedding = list(analysis['embedding'])
+            temp_person.face_bbox = list(analysis["bbox"])
+            temp_person.face_embedding = list(analysis["embedding"])
             temp_person.face_embedding_at = now
             matches = self.face_db.match_embedding(
-                analysis['embedding'],
+                analysis["embedding"],
                 threshold=self.AUTO_RELINK_THRESHOLD,
             )
             if not matches:
@@ -1396,14 +1406,14 @@ class RecognitionPipeline:
             if selected_match is None:
                 continue
 
-            temp_person.face_bbox = analysis['bbox']
+            temp_person.face_bbox = analysis["bbox"]
             confirmed_person = self._promote_temporary_to_confirmed_locked(
                 temp_person.temp_id,
                 selected_match,
                 now,
             )
             if confirmed_person is not None:
-                self._push_announcement_locked(f'{confirmed_person.name} 已重新回到畫面中。')
+                self._push_announcement_locked(f"{confirmed_person.name} 已重新回到畫面中。")
             break
 
     def _draw_label_pills(self, frame, label_specs):
@@ -1419,19 +1429,19 @@ class RecognitionPipeline:
         base_font_size = max(24, min(32, int(round(frame_width / 44.0))))
 
         for label_spec in label_specs:
-            text = str(label_spec.get('text', '')).strip()
+            text = str(label_spec.get("text", "")).strip()
             if not text:
                 continue
 
-            bbox = label_spec.get('bbox')
-            font_size = int(label_spec.get('font_size') or 0)
+            bbox = label_spec.get("bbox")
+            font_size = int(label_spec.get("font_size") or 0)
             if font_size <= 0:
                 font_size = base_font_size
                 if bbox is not None and len(bbox) == 4:
                     box_height = max(1, int(bbox[3]) - int(bbox[1]))
                     font_size = max(font_size, min(36, int(round(box_height * 0.18))))
             font = self._get_label_font(font_size)
-            x1, y1 = label_spec['anchor']
+            x1, y1 = label_spec["anchor"]
             text_box = drawer.textbbox((0, 0), text, font=font)
             text_width = text_box[2] - text_box[0]
             text_height = text_box[3] - text_box[1]
@@ -1450,7 +1460,7 @@ class RecognitionPipeline:
             drawer.rounded_rectangle(
                 (pill_left, pill_top, pill_right, pill_bottom),
                 radius=max(16, int(round(font_size * 0.65))),
-                fill=label_spec['background'],
+                fill=label_spec["background"],
             )
             drawer.text(
                 (pill_left + pad_x, pill_top + pad_y - 1),
@@ -1475,15 +1485,15 @@ class RecognitionPipeline:
             cv2.rectangle(overlay, (x1, y1), (x2, y2), (61, 126, 255), 2)
             label_specs.append(
                 {
-                    'anchor': (x1, y1),
-                    'bbox': (x1, y1, x2, y2),
-                    'text': person.display_name,
-                    'background': (11, 15, 25),
+                    "anchor": (x1, y1),
+                    "bbox": (x1, y1, x2, y2),
+                    "text": person.display_name,
+                    "background": (11, 15, 25),
                 }
             )
 
         for person in self._confirmed_people.values():
-            if person.current_status != 'present' or person.bbox is None:
+            if person.current_status != "present" or person.bbox is None:
                 continue
             _, pose_detection = self._detector.match_pose_detection_to_bbox(person.bbox, detections)
             self._draw_pose_overlay(overlay, pose_detection, (112, 245, 255), bbox=person.bbox)
@@ -1491,10 +1501,10 @@ class RecognitionPipeline:
             cv2.rectangle(overlay, (x1, y1), (x2, y2), (31, 199, 212), 2)
             label_specs.append(
                 {
-                    'anchor': (x1, y1),
-                    'bbox': (x1, y1, x2, y2),
-                    'text': person.student_id or person.name,
-                    'background': (7, 35, 39),
+                    "anchor": (x1, y1),
+                    "bbox": (x1, y1, x2, y2),
+                    "text": person.student_id or person.name,
+                    "background": (7, 35, 39),
                 }
             )
 
@@ -1537,7 +1547,7 @@ class RecognitionPipeline:
         font = cv2.FONT_HERSHEY_SIMPLEX
         font_scale = max(0.44, min(0.86, min(box_width / 220.0, box_height / 132.0)))
         thickness = max(1, int(round(font_scale * 2.0)))
-        value_text = str(text or '-- cm')
+        value_text = str(text or "-- cm")
         text_size, baseline = cv2.getTextSize(value_text, font, font_scale, thickness)
 
         center_x = int((x1 + x2) / 2)
@@ -1676,7 +1686,7 @@ class RecognitionPipeline:
 
             if show_distance:
                 distance_bbox = bbox
-                if depth_frame is not None and hasattr(depth_frame, 'shape'):
+                if depth_frame is not None and hasattr(depth_frame, "shape"):
                     scaled_depth_bbox = self._scale_bbox_between_frames(bbox, color_shape, depth_frame.shape)
                     if scaled_depth_bbox is not None:
                         distance_bbox = scaled_depth_bbox
@@ -1687,25 +1697,25 @@ class RecognitionPipeline:
                     smoothing_key=smoothing_key,
                     source_mode=depth_source_mode,
                 )
-                distance_text = '-- cm' if distance_cm is None else f'{distance_cm:.1f} cm'
+                distance_text = "-- cm" if distance_cm is None else f"{distance_cm:.1f} cm"
                 self._draw_distance_label(annotated, mapped_bbox, distance_text, (233, 241, 255))
 
-            clean_label = str(label_text or '').strip()
+            clean_label = str(label_text or "").strip()
             if clean_label:
                 label_specs.append(
                     {
-                        'anchor': (x1, y1),
-                        'bbox': (x1, y1, x2, y2),
-                        'text': clean_label,
-                        'background': label_background,
+                        "anchor": (x1, y1),
+                        "bbox": (x1, y1, x2, y2),
+                        "text": clean_label,
+                        "background": label_background,
                     }
                 )
 
         for person in self._confirmed_people.values():
-            if person.current_status != 'present' or person.bbox is None:
+            if person.current_status != "present" or person.bbox is None:
                 continue
             depth_label = person.student_id or person.name
-            smoothing_key = str(person.user_id or person.student_id or person.label or '').strip()
+            smoothing_key = str(person.user_id or person.student_id or person.label or "").strip()
             detection_index, pose_detection = self._detector.match_pose_detection_to_bbox(
                 person.bbox,
                 detections,
@@ -1729,7 +1739,7 @@ class RecognitionPipeline:
             if person.bbox is None:
                 continue
             depth_label = person.display_name
-            smoothing_key = str(person.temp_id or person.tracking_id or '').strip()
+            smoothing_key = str(person.temp_id or person.tracking_id or "").strip()
             detection_index, pose_detection = self._detector.match_pose_detection_to_bbox(
                 person.bbox,
                 detections,
@@ -1761,46 +1771,44 @@ class RecognitionPipeline:
             include_presence_points=True,
             include_metrics=False,
         )
-        confirmed_present_count = sum(
-            1 for item in confirmed_payload if item['current_status'] == 'present'
-        )
+        confirmed_present_count = sum(1 for item in confirmed_payload if item["current_status"] == "present")
 
         if temporary_payload or confirmed_present_count:
             message = (
-                f'課堂追蹤進行中，目前偵測 {len(temporary_payload)} 位暫時學生，'
-                f'已確認 {confirmed_present_count} 位在場學生。'
+                f"課堂追蹤進行中，目前偵測 {len(temporary_payload)} 位暫時學生，"
+                f"已確認 {confirmed_present_count} 位在場學生。"
             )
-            status = 'attendance_running'
+            status = "attendance_running"
         else:
-            message = '課堂模式已啟動，正在等待學生進入畫面。'
-            status = 'attendance_waiting'
+            message = "課堂模式已啟動，正在等待學生進入畫面。"
+            status = "attendance_waiting"
 
         self._status.update(
             {
-                'status': status,
-                'message': message,
-                'attendance_mode': True,
-                'temporary_people': temporary_payload,
-                'confirmed_people': confirmed_payload,
-                'students': confirmed_payload,
-                'temporary_count': len(temporary_payload),
-                'confirmed_present_count': confirmed_present_count,
-                'confirmed_total_count': len(confirmed_payload),
-                'recognized_count': confirmed_present_count,
-                'yolo_person_present': bool(self._detector._last_person_boxes),
-                'announcement': self._announcements[-1]['message'] if self._announcements else '課堂模式已啟動。',
+                "status": status,
+                "message": message,
+                "attendance_mode": True,
+                "temporary_people": temporary_payload,
+                "confirmed_people": confirmed_payload,
+                "students": confirmed_payload,
+                "temporary_count": len(temporary_payload),
+                "confirmed_present_count": confirmed_present_count,
+                "confirmed_total_count": len(confirmed_payload),
+                "recognized_count": confirmed_present_count,
+                "yolo_person_present": bool(self._detector._last_person_boxes),
+                "announcement": self._announcements[-1]["message"] if self._announcements else "課堂模式已啟動。",
             }
         )
 
     def _process_frame(self, frame, depth_frame=None, depth_visual_frame=None, frame_timestamp=None):
         now = float(frame_timestamp) if frame_timestamp is not None else time.time()
         kinect_status = self.kinect_service.get_status()
-        if kinect_status['status'] != 'connected':
+        if kinect_status["status"] != "connected":
             with self._lock:
                 self._temporary_people = {}
                 self._next_temp_number = 1
                 for person in self._confirmed_people.values():
-                    if person.current_status == 'present':
+                    if person.current_status == "present":
                         self._set_confirmed_absent_locked(person, now)
                 self._save_presence_records_locked()
                 self._last_render_at = 0.0
@@ -1817,18 +1825,18 @@ class RecognitionPipeline:
                 )
                 self._status.update(
                     {
-                        'status': 'camera_unavailable',
-                        'message': kinect_status['message'],
-                        'attendance_mode': self._attendance_mode,
-                        'temporary_people': [],
-                        'confirmed_people': confirmed_payload,
-                        'students': confirmed_payload,
-                        'temporary_count': 0,
-                        'confirmed_present_count': 0,
-                        'confirmed_total_count': len(confirmed_payload),
-                        'recognized_count': 0,
-                        'yolo_person_present': False,
-                        'detector_model': 'idle',
+                        "status": "camera_unavailable",
+                        "message": kinect_status["message"],
+                        "attendance_mode": self._attendance_mode,
+                        "temporary_people": [],
+                        "confirmed_people": confirmed_payload,
+                        "students": confirmed_payload,
+                        "temporary_count": 0,
+                        "confirmed_present_count": 0,
+                        "confirmed_total_count": len(confirmed_payload),
+                        "recognized_count": 0,
+                        "yolo_person_present": False,
+                        "detector_model": "idle",
                     }
                 )
             return
@@ -1847,20 +1855,20 @@ class RecognitionPipeline:
             with self._lock:
                 self._status.update(
                     {
-                        'status': 'model_warming',
-                        'message': '模型暖機中，稍後開始偵測學生。',
-                        'attendance_mode': True,
-                        'detector_model': 'warming_up',
+                        "status": "model_warming",
+                        "message": "模型暖機中，稍後開始偵測學生。",
+                        "attendance_mode": True,
+                        "detector_model": "warming_up",
                     }
                 )
             return
 
         try:
-            if depth_frame is None and hasattr(self.kinect_service, 'get_latest_depth_frame'):
+            if depth_frame is None and hasattr(self.kinect_service, "get_latest_depth_frame"):
                 depth_frame = self.kinect_service.get_latest_depth_frame()
             if depth_frame is None:
                 depth_frame = None
-            if depth_visual_frame is None and hasattr(self.kinect_service, 'get_latest_depth_visual_frame'):
+            if depth_visual_frame is None and hasattr(self.kinect_service, "get_latest_depth_visual_frame"):
                 depth_visual_frame = self.kinect_service.get_latest_depth_visual_frame()
             if depth_visual_frame is None:
                 depth_visual_frame = None
@@ -1888,16 +1896,16 @@ class RecognitionPipeline:
                 self._detector._cleanup_pose_fusion_tracks(now, reset=True)
                 self._status.update(
                     {
-                        'status': 'unavailable',
-                        'message': str(exc),
-                        'temporary_people': [],
-                        'confirmed_people': confirmed_payload,
-                        'students': confirmed_payload,
-                        'temporary_count': 0,
-                        'confirmed_present_count': 0,
-                        'confirmed_total_count': len(confirmed_payload),
-                        'recognized_count': 0,
-                        'yolo_person_present': False,
+                        "status": "unavailable",
+                        "message": str(exc),
+                        "temporary_people": [],
+                        "confirmed_people": confirmed_payload,
+                        "students": confirmed_payload,
+                        "temporary_count": 0,
+                        "confirmed_present_count": 0,
+                        "confirmed_total_count": len(confirmed_payload),
+                        "recognized_count": 0,
+                        "yolo_person_present": False,
                     }
                 )
             return
@@ -1908,10 +1916,7 @@ class RecognitionPipeline:
             self._match_detections_locked(person_boxes, now)
             self._update_classroom_metrics_locked(frame.shape, depth_frame, now)
             self._update_summary_locked(now)
-            should_render = (
-                self._annotated_jpeg is None
-                or (now - self._last_render_at) >= self.RENDER_INTERVAL
-            )
+            should_render = self._annotated_jpeg is None or (now - self._last_render_at) >= self.RENDER_INTERVAL
             if should_render:
                 annotated = self._annotate_frame_locked(frame)
                 _new_color = self._encode_frame(annotated)
@@ -1945,35 +1950,33 @@ class RecognitionPipeline:
             frame_bundle = None
             frame_seq = 0
             frame_timestamp_candidate = 0.0
-            if hasattr(self.kinect_service, 'get_latest_frame_marker'):
+            if hasattr(self.kinect_service, "get_latest_frame_marker"):
                 frame_marker = self.kinect_service.get_latest_frame_marker()
-                frame_seq = int(frame_marker.get('frame_seq') or 0)
-                frame_timestamp_candidate = float(frame_marker.get('timestamp') or 0.0)
-                if (
-                    frame_seq <= self._last_source_frame_seq
-                    and frame_timestamp_candidate <= (self._last_source_frame_timestamp + 1e-6)
+                frame_seq = int(frame_marker.get("frame_seq") or 0)
+                frame_timestamp_candidate = float(frame_marker.get("timestamp") or 0.0)
+                if frame_seq <= self._last_source_frame_seq and frame_timestamp_candidate <= (
+                    self._last_source_frame_timestamp + 1e-6
                 ):
                     self._wake_event.wait(self.LOOP_INTERVAL * 0.5)
                     self._wake_event.clear()
                     continue
 
-            if hasattr(self.kinect_service, 'get_latest_frame_bundle'):
+            if hasattr(self.kinect_service, "get_latest_frame_bundle"):
                 frame_bundle = self.kinect_service.get_latest_frame_bundle()
 
             if frame_bundle is not None:
-                frame_seq = int(frame_bundle.get('frame_seq') or frame_seq)
-                frame_timestamp_candidate = float(frame_bundle.get('timestamp') or frame_timestamp_candidate)
-                if (
-                    frame_seq <= self._last_source_frame_seq
-                    and frame_timestamp_candidate <= (self._last_source_frame_timestamp + 1e-6)
+                frame_seq = int(frame_bundle.get("frame_seq") or frame_seq)
+                frame_timestamp_candidate = float(frame_bundle.get("timestamp") or frame_timestamp_candidate)
+                if frame_seq <= self._last_source_frame_seq and frame_timestamp_candidate <= (
+                    self._last_source_frame_timestamp + 1e-6
                 ):
                     self._wake_event.wait(self.LOOP_INTERVAL * 0.5)
                     self._wake_event.clear()
                     continue
 
-                frame = frame_bundle.get('color_frame')
-                depth_frame = frame_bundle.get('depth_raw_frame')
-                depth_visual_frame = frame_bundle.get('depth_visual_frame')
+                frame = frame_bundle.get("color_frame")
+                depth_frame = frame_bundle.get("depth_raw_frame")
+                depth_visual_frame = frame_bundle.get("depth_visual_frame")
                 frame_timestamp = frame_timestamp_candidate
                 self._last_source_frame_seq = frame_seq
                 self._last_source_frame_timestamp = frame_timestamp_candidate
@@ -2006,16 +2009,16 @@ class RecognitionPipeline:
                     self._detector._cleanup_pose_fusion_tracks(time.time(), reset=True)
                     self._status.update(
                         {
-                            'status': 'error',
-                            'message': str(exc),
-                            'temporary_people': [],
-                            'confirmed_people': confirmed_payload,
-                            'students': confirmed_payload,
-                            'temporary_count': 0,
-                            'confirmed_present_count': 0,
-                            'confirmed_total_count': len(confirmed_payload),
-                            'recognized_count': 0,
-                            'yolo_person_present': False,
+                            "status": "error",
+                            "message": str(exc),
+                            "temporary_people": [],
+                            "confirmed_people": confirmed_payload,
+                            "students": confirmed_payload,
+                            "temporary_count": 0,
+                            "confirmed_present_count": 0,
+                            "confirmed_total_count": len(confirmed_payload),
+                            "recognized_count": 0,
+                            "yolo_person_present": False,
                         }
                     )
             self._wake_event.wait(self.LOOP_INTERVAL)

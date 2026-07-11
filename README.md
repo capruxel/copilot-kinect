@@ -114,5 +114,3 @@ uv run python -m unittest discover tests
 ```
 
 目前測試以姿態與深度指標邏輯為主，不需要接上實體 Kinect。
-
-

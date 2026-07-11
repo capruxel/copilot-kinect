@@ -57,7 +57,7 @@ def test_safe_std_two_values():
 
 
 def test_format_time_label():
-    assert _format_time_label(0) == '08:00:00'
+    assert _format_time_label(0) == "08:00:00"
 
 
 def test_trim_time_series_removes_old():
@@ -75,14 +75,13 @@ def test_trim_time_series_keeps_all_within_window():
 
 def test_trim_metric_rows_removes_old():
     now = 1000.0
-    rows = [{'t': 500}, {'t': 800}, {'t': 900}]
+    rows = [{"t": 500}, {"t": 800}, {"t": 900}]
     trimmed = _trim_metric_rows(rows, now, 200)
     assert len(trimmed) == 2
 
 
 def test_trim_metric_rows_empty():
     assert _trim_metric_rows([], 1000.0, 200) == []
-
 
 
 _UNSET = object()
@@ -166,7 +165,7 @@ class TestPoseDepthMetricEngineDepth:
         self.engine = PoseDepthMetricEngine()
 
     def test_depth_at_with_none_frame_returns_none(self):
-        assert self.engine._depth_at(None, (100, 100), 'kinect') is None
+        assert self.engine._depth_at(None, (100, 100), "kinect") is None
 
 
 class TestPoseDepthMetricEngineUpdate:
@@ -174,16 +173,24 @@ class TestPoseDepthMetricEngineUpdate:
         self.engine = PoseDepthMetricEngine()
 
     def test_update_student_minimal_no_crash(self):
-        user_id = 'student_1'
+        user_id = "student_1"
         frame_shape = (480, 640)
         bbox = [50, 60, 200, 250]
         pose_detection = {
-            'keypoints': [
-                [320, 120], [340, 110], [300, 110],
-                None, None,
-                [280, 200], [360, 200],
-                None, None, None, None,
-                [290, 320], [350, 320],
+            "keypoints": [
+                [320, 120],
+                [340, 110],
+                [300, 110],
+                None,
+                None,
+                [280, 200],
+                [360, 200],
+                None,
+                None,
+                None,
+                None,
+                [290, 320],
+                [350, 320],
             ],
         }
         self.engine.update_student(
@@ -192,7 +199,7 @@ class TestPoseDepthMetricEngineUpdate:
             bbox=bbox,
             pose_detection=pose_detection,
             depth_frame=None,
-            depth_source_mode='kinect',
+            depth_source_mode="kinect",
             peer_centers=[],
             now=1000.0,
         )

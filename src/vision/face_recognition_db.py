@@ -8,11 +8,11 @@ from pathlib import Path
 class FaceRecognitionDB:
     def __init__(self, base_dir):
         self.base_dir = Path(base_dir)
-        self.data_dir = self.base_dir / 'data'
-        self.photo_root = self.data_dir / 'student_faces'
-        self.embedding_dir = self.data_dir / 'embeddings'
-        self.embedding_file = self.embedding_dir / 'face_embeddings.json'
-        self.user_file = self.data_dir / 'user.json'
+        self.data_dir = self.base_dir / "data"
+        self.photo_root = self.data_dir / "student_faces"
+        self.embedding_dir = self.data_dir / "embeddings"
+        self.embedding_file = self.embedding_dir / "face_embeddings.json"
+        self.user_file = self.data_dir / "user.json"
         self._app = None
         self._app_error = None
         self._app_providers = []
@@ -25,6 +25,7 @@ class FaceRecognitionDB:
         self._add_nvidia_redist_bins_to_path()
         try:
             import onnxruntime as ort  # pylint: disable=import-outside-toplevel
+
             return list(ort.get_available_providers())
         except Exception:
             return []
@@ -32,42 +33,43 @@ class FaceRecognitionDB:
     @staticmethod
     def _add_nvidia_redist_bins_to_path():
         import sysconfig  # pylint: disable=import-outside-toplevel
-        nvidia_root = Path(sysconfig.get_path('purelib')) / 'nvidia'
+
+        nvidia_root = Path(sysconfig.get_path("purelib")) / "nvidia"
         if not nvidia_root.is_dir():
             return
-        path = os.environ.get('PATH', '')
+        path = os.environ.get("PATH", "")
         extra = []
         for item in nvidia_root.iterdir():
-            bin_path = item / 'bin'
+            bin_path = item / "bin"
             if bin_path.is_dir() and str(bin_path) not in path:
                 extra.append(str(bin_path))
         if extra:
-            os.environ['PATH'] = os.pathsep.join(extra) + os.pathsep + path
+            os.environ["PATH"] = os.pathsep.join(extra) + os.pathsep + path
 
     def _resolve_insightface_runtime(self):
         available = self._available_onnx_providers()
         available_set = set(available)
 
-        raw_providers = str(os.getenv('INSIGHTFACE_PROVIDERS', '')).strip()
+        raw_providers = str(os.getenv("INSIGHTFACE_PROVIDERS", "")).strip()
         if raw_providers:
-            providers = [item.strip() for item in raw_providers.split(',') if item.strip()]
+            providers = [item.strip() for item in raw_providers.split(",") if item.strip()]
         else:
             providers = []
-            for provider_name in ('CUDAExecutionProvider', 'DmlExecutionProvider', 'CPUExecutionProvider'):
+            for provider_name in ("CUDAExecutionProvider", "DmlExecutionProvider", "CPUExecutionProvider"):
                 if provider_name in available_set:
                     providers.append(provider_name)
             if not providers:
-                providers = ['CPUExecutionProvider']
+                providers = ["CPUExecutionProvider"]
 
-        if 'CPUExecutionProvider' not in providers:
-            providers.append('CPUExecutionProvider')
+        if "CPUExecutionProvider" not in providers:
+            providers.append("CPUExecutionProvider")
 
         return providers
 
     def get_analysis_runtime_info(self):
         return {
-            'providers': list(self._app_providers),
-            'ready': self._app is not None,
+            "providers": list(self._app_providers),
+            "ready": self._app is not None,
         }
 
     def get_photo_root(self):
@@ -84,23 +86,23 @@ class FaceRecognitionDB:
 
     def next_student_label(self):
         max_index = 0
-        prefix = f'{chr(0x5B78)}{chr(0x751F)}'
+        prefix = f"{chr(0x5B78)}{chr(0x751F)}"
         for label in self.list_student_labels():
-            suffix_digits = ''.join(character for character in label if character.isdigit())
+            suffix_digits = "".join(character for character in label if character.isdigit())
             if suffix_digits:
                 max_index = max(max_index, int(suffix_digits))
-        return f'{prefix}{max_index + 1}'
+        return f"{prefix}{max_index + 1}"
 
     def load_user_profiles(self):
         if not self.user_file.exists():
             return {}
 
-        with self.user_file.open('r', encoding='utf-8-sig') as user_file:
+        with self.user_file.open("r", encoding="utf-8-sig") as user_file:
             payload = json.load(user_file)
 
         profiles = {}
-        for item in payload.get('students', []):
-            label = item.get('label')
+        for item in payload.get("students", []):
+            label = item.get("label")
             if label:
                 profiles[label] = item
         return profiles
@@ -113,43 +115,43 @@ class FaceRecognitionDB:
             item = profiles.get(label, {})
             students.append(
                 {
-                    'label': label,
-                    'name': item.get('name', label),
-                    'student_id': item.get('student_id', ''),
-                    'college': item.get('college', ''),
-                    'department': item.get('department', ''),
-                    'title': item.get('title', ''),
+                    "label": label,
+                    "name": item.get("name", label),
+                    "student_id": item.get("student_id", ""),
+                    "college": item.get("college", ""),
+                    "department": item.get("department", ""),
+                    "title": item.get("title", ""),
                 }
             )
 
-        with self.user_file.open('w', encoding='utf-8') as user_file:
-            json.dump({'students': students}, user_file, ensure_ascii=False, indent=2)
+        with self.user_file.open("w", encoding="utf-8") as user_file:
+            json.dump({"students": students}, user_file, ensure_ascii=False, indent=2)
 
         return students
 
     def _temporary_label_prefix(self):
-        return f'{chr(0x5B78)}{chr(0x751F)}'
+        return f"{chr(0x5B78)}{chr(0x751F)}"
 
     def _is_temporary_label(self, label):
-        return str(label or '').startswith(self._temporary_label_prefix())
+        return str(label or "").startswith(self._temporary_label_prefix())
 
-    def _sanitize_profile_label(self, name, student_id=''):
-        label = ''.join(character for character in str(name or '').strip() if character not in '<>:"/\\|?*').strip()
+    def _sanitize_profile_label(self, name, student_id=""):
+        label = "".join(character for character in str(name or "").strip() if character not in '<>:"/\\|?*').strip()
         if not label:
-            label = str(student_id or '').strip() or self.next_student_label()
+            label = str(student_id or "").strip() or self.next_student_label()
         return label
 
     def _resolve_profile_label(self, profiles, student_id, name):
-        normalized_student_id = (student_id or '').strip()
-        normalized_name = (name or '').strip()
+        normalized_student_id = (student_id or "").strip()
+        normalized_name = (name or "").strip()
         desired_label = self._sanitize_profile_label(normalized_name, normalized_student_id)
 
         for label, item in profiles.items():
-            if normalized_student_id and item.get('student_id', '').strip() == normalized_student_id:
+            if normalized_student_id and item.get("student_id", "").strip() == normalized_student_id:
                 return label, desired_label
 
         for label, item in profiles.items():
-            if normalized_name and item.get('name', '').strip() == normalized_name:
+            if normalized_name and item.get("name", "").strip() == normalized_name:
                 return label, desired_label
 
         return None, desired_label
@@ -162,12 +164,12 @@ class FaceRecognitionDB:
         for label in labels:
             item = profiles.get(label, {})
             synced[label] = {
-                'label': label,
-                'name': item.get('name', label),
-                'student_id': item.get('student_id', ''),
-                'college': item.get('college', ''),
-                'department': item.get('department', ''),
-                'title': item.get('title', ''),
+                "label": label,
+                "name": item.get("name", label),
+                "student_id": item.get("student_id", ""),
+                "college": item.get("college", ""),
+                "department": item.get("department", ""),
+                "title": item.get("title", ""),
             }
 
         self.save_user_profiles(synced)
@@ -189,11 +191,11 @@ class FaceRecognitionDB:
             try:
                 from insightface.app import FaceAnalysis  # pylint: disable=import-outside-toplevel
             except Exception as exc:  # pylint: disable=broad-except
-                self._app_error = f'InsightFace is not available: {exc}'
+                self._app_error = f"InsightFace is not available: {exc}"
                 raise RuntimeError(self._app_error) from exc
 
             providers = self._resolve_insightface_runtime()
-            app = FaceAnalysis(name='buffalo_s', providers=providers)
+            app = FaceAnalysis(name="buffalo_s", providers=providers)
             app.prepare(ctx_id=0)
             self._app = app
             self._app_providers = providers
@@ -221,7 +223,7 @@ class FaceRecognitionDB:
         try:
             app = self._load_insightface_app()
         except RuntimeError as exc:
-            return {'status': 'unavailable', 'message': str(exc), 'faces': []}
+            return {"status": "unavailable", "message": str(exc), "faces": []}
 
         faces = app.get(image)
         payload = []
@@ -229,15 +231,15 @@ class FaceRecognitionDB:
             bbox = [float(value) for value in face.bbox.tolist()]
             payload.append(
                 {
-                    'bbox': bbox,
-                    'embedding': face.embedding.tolist(),
-                    'det_score': float(getattr(face, 'det_score', 0.0)),
+                    "bbox": bbox,
+                    "embedding": face.embedding.tolist(),
+                    "det_score": float(getattr(face, "det_score", 0.0)),
                 }
             )
 
         if payload:
-            return {'status': 'ok', 'message': 'Faces detected.', 'faces': payload}
-        return {'status': 'no_face', 'message': 'No face detected in current frame.', 'faces': []}
+            return {"status": "ok", "message": "Faces detected.", "faces": payload}
+        return {"status": "no_face", "message": "No face detected in current frame.", "faces": []}
 
     def _read_image(self, image_path):
         import cv2  # pylint: disable=import-outside-toplevel
@@ -252,7 +254,7 @@ class FaceRecognitionDB:
             except Exception:
                 image = None
         if image is None:
-            raise RuntimeError(f'Unable to read image: {image_path.name}')
+            raise RuntimeError(f"Unable to read image: {image_path.name}")
         return image
 
     def _invalidate_embedding_cache(self):
@@ -274,10 +276,10 @@ class FaceRecognitionDB:
             if self._embedding_cache_mtime == mtime:
                 return self._embedding_cache
 
-            with self.embedding_file.open('r', encoding='utf-8') as db_file:
+            with self.embedding_file.open("r", encoding="utf-8") as db_file:
                 payload = json.load(db_file)
 
-            students = payload.get('students', [])
+            students = payload.get("students", [])
             self._embedding_cache = students if isinstance(students, list) else []
             self._embedding_cache_mtime = mtime
             return self._embedding_cache
@@ -290,19 +292,19 @@ class FaceRecognitionDB:
             images = [
                 path.name
                 for path in sorted(student_dir.iterdir())
-                if path.is_file() and path.suffix.lower() in {'.jpg', '.jpeg', '.png', '.bmp'}
+                if path.is_file() and path.suffix.lower() in {".jpg", ".jpeg", ".png", ".bmp"}
             ]
             item = profiles.get(label, {})
             overview.append(
                 {
-                    'label': label,
-                    'name': item.get('name', label),
-                    'student_id': item.get('student_id', ''),
-                    'college': item.get('college', ''),
-                    'department': item.get('department', ''),
-                    'title': item.get('title', ''),
-                    'image_count': len(images),
-                    'images': images,
+                    "label": label,
+                    "name": item.get("name", label),
+                    "student_id": item.get("student_id", ""),
+                    "college": item.get("college", ""),
+                    "department": item.get("department", ""),
+                    "title": item.get("title", ""),
+                    "image_count": len(images),
+                    "images": images,
                 }
             )
         return overview
@@ -316,7 +318,7 @@ class FaceRecognitionDB:
         existing = [
             path
             for path in student_dir.iterdir()
-            if path.is_file() and path.suffix.lower() in {'.jpg', '.jpeg', '.png', '.bmp'}
+            if path.is_file() and path.suffix.lower() in {".jpg", ".jpeg", ".png", ".bmp"}
         ]
         if replace:
             for path in existing:
@@ -327,23 +329,23 @@ class FaceRecognitionDB:
         saved_files = []
 
         for frame in frames:
-            target_path = student_dir / f'{next_index:02d}.jpg'
-            ok, buffer = cv2.imencode('.jpg', frame)
+            target_path = student_dir / f"{next_index:02d}.jpg"
+            ok, buffer = cv2.imencode(".jpg", frame)
             if not ok:
-                raise RuntimeError('Unable to encode captured frame.')
+                raise RuntimeError("Unable to encode captured frame.")
             target_path.write_bytes(buffer.tobytes())
             saved_files.append(target_path)
             next_index += 1
 
         return saved_files
 
-    def upsert_student_with_captures(self, name, student_id, frames, college='', department='', title=''):
+    def upsert_student_with_captures(self, name, student_id, frames, college="", department="", title=""):
         if not name.strip():
-            raise RuntimeError('Student name is required.')
+            raise RuntimeError("Student name is required.")
         if not student_id.strip():
-            raise RuntimeError('Student ID is required.')
+            raise RuntimeError("Student ID is required.")
         if len(frames) < 3:
-            raise RuntimeError('At least 3 captured frames are required.')
+            raise RuntimeError("At least 3 captured frames are required.")
 
         self.ensure_storage()
         profiles = self.load_user_profiles()
@@ -356,35 +358,35 @@ class FaceRecognitionDB:
             existing_dir = self.photo_root / existing_label
             if existing_dir.exists() and self._is_temporary_label(existing_label):
                 for path in existing_dir.iterdir():
-                    if path.is_file() and path.suffix.lower() in {'.jpg', '.jpeg', '.png', '.bmp'}:
+                    if path.is_file() and path.suffix.lower() in {".jpg", ".jpeg", ".png", ".bmp"}:
                         path.unlink()
                 existing_dir.rmdir()
             profiles.pop(existing_label, None)
 
         profiles[label] = {
-            'label': label,
-            'name': name.strip(),
-            'student_id': student_id.strip(),
-            'college': college.strip(),
-            'department': department.strip(),
-            'title': title.strip(),
+            "label": label,
+            "name": name.strip(),
+            "student_id": student_id.strip(),
+            "college": college.strip(),
+            "department": department.strip(),
+            "title": title.strip(),
         }
         self.save_user_profiles(profiles)
         saved_files = self.save_captured_frames(label, frames, replace=True)
 
         return {
-            'label': label,
-            'name': profiles[label]['name'],
-            'student_id': profiles[label]['student_id'],
-            'college': profiles[label]['college'],
-            'department': profiles[label]['department'],
-            'title': profiles[label]['title'],
-            'saved_files': [path.name for path in saved_files],
-            'image_count': len(
+            "label": label,
+            "name": profiles[label]["name"],
+            "student_id": profiles[label]["student_id"],
+            "college": profiles[label]["college"],
+            "department": profiles[label]["department"],
+            "title": profiles[label]["title"],
+            "saved_files": [path.name for path in saved_files],
+            "image_count": len(
                 [
                     path
                     for path in student_dir.iterdir()
-                    if path.is_file() and path.suffix.lower() in {'.jpg', '.jpeg', '.png', '.bmp'}
+                    if path.is_file() and path.suffix.lower() in {".jpg", ".jpeg", ".png", ".bmp"}
                 ]
             ),
         }
@@ -393,37 +395,37 @@ class FaceRecognitionDB:
         self.ensure_storage()
         valid_labels = set(self.list_student_labels())
         if label not in valid_labels:
-            raise RuntimeError(f'Unknown student label: {label}')
+            raise RuntimeError(f"Unknown student label: {label}")
 
         suffix = Path(filename).suffix.lower()
-        if suffix not in {'.jpg', '.jpeg', '.png', '.bmp'}:
-            raise RuntimeError('Only jpg, jpeg, png, and bmp files are supported.')
+        if suffix not in {".jpg", ".jpeg", ".png", ".bmp"}:
+            raise RuntimeError("Only jpg, jpeg, png, and bmp files are supported.")
 
         student_dir = self.photo_root / label
         existing = [path for path in student_dir.iterdir() if path.is_file()]
         next_index = len(existing) + 1
-        target_path = student_dir / f'{next_index:02d}{suffix}'
+        target_path = student_dir / f"{next_index:02d}{suffix}"
         target_path.write_bytes(payload)
         return target_path
 
     def match_embedding(self, embedding, threshold=0.45):
         candidates = []
         for item in self.load_database():
-            similarity = self._cosine_similarity(embedding, item['embedding'])
+            similarity = self._cosine_similarity(embedding, item["embedding"])
             if similarity >= threshold:
                 candidates.append(
                     {
-                        'label': item['label'],
-                        'display_name': item.get('display_name', item['label']),
-                        'student_id': item.get('student_id', ''),
-                        'college': item.get('college', ''),
-                        'department': item.get('department', ''),
-                        'title': item.get('title', ''),
-                        'similarity': round(similarity, 4),
+                        "label": item["label"],
+                        "display_name": item.get("display_name", item["label"]),
+                        "student_id": item.get("student_id", ""),
+                        "college": item.get("college", ""),
+                        "department": item.get("department", ""),
+                        "title": item.get("title", ""),
+                        "similarity": round(similarity, 4),
                     }
                 )
 
-        candidates.sort(key=lambda item: item['similarity'], reverse=True)
+        candidates.sort(key=lambda item: item["similarity"], reverse=True)
         return candidates
 
     def build_database(self):
@@ -436,7 +438,7 @@ class FaceRecognitionDB:
             image_count = 0
 
             for image_path in sorted(student_dir.iterdir()):
-                if image_path.suffix.lower() not in {'.jpg', '.jpeg', '.png', '.bmp'}:
+                if image_path.suffix.lower() not in {".jpg", ".jpeg", ".png", ".bmp"}:
                     continue
 
                 image = self._read_image(image_path)
@@ -448,31 +450,30 @@ class FaceRecognitionDB:
             if embeddings:
                 embedding_size = len(embeddings[0])
                 mean_embedding = [
-                    sum(item[index] for item in embeddings) / len(embeddings)
-                    for index in range(embedding_size)
+                    sum(item[index] for item in embeddings) / len(embeddings) for index in range(embedding_size)
                 ]
 
                 profile = profiles.get(student_dir.name, {})
                 students.append(
                     {
-                        'label': student_dir.name,
-                        'display_name': profile.get('name', student_dir.name),
-                        'student_id': profile.get('student_id', ''),
-                        'college': profile.get('college', ''),
-                        'department': profile.get('department', ''),
-                        'title': profile.get('title', ''),
-                        'image_count': image_count,
-                        'matched_images': len(embeddings),
-                        'embedding': mean_embedding,
+                        "label": student_dir.name,
+                        "display_name": profile.get("name", student_dir.name),
+                        "student_id": profile.get("student_id", ""),
+                        "college": profile.get("college", ""),
+                        "department": profile.get("department", ""),
+                        "title": profile.get("title", ""),
+                        "image_count": image_count,
+                        "matched_images": len(embeddings),
+                        "embedding": mean_embedding,
                     }
                 )
 
         with self._lock:
             payload = {
-                'students': students,
-                'photo_root': str(self.photo_root),
+                "students": students,
+                "photo_root": str(self.photo_root),
             }
-            with self.embedding_file.open('w', encoding='utf-8') as db_file:
+            with self.embedding_file.open("w", encoding="utf-8") as db_file:
                 json.dump(payload, db_file, ensure_ascii=False, indent=2)
             self._embedding_cache = students
             try:
@@ -484,12 +485,12 @@ class FaceRecognitionDB:
 
     def recognize_from_frame(self, frame, threshold=0.45):
         analysis = self.analyze_faces(frame)
-        if analysis['status'] == 'unavailable':
-            return {'status': 'unavailable', 'message': analysis['message'], 'students': []}
-        if not analysis['faces']:
-            return {'status': 'no_face', 'message': analysis['message'], 'students': []}
+        if analysis["status"] == "unavailable":
+            return {"status": "unavailable", "message": analysis["message"], "students": []}
+        if not analysis["faces"]:
+            return {"status": "no_face", "message": analysis["message"], "students": []}
 
-        students = self.match_embedding(analysis['faces'][0]['embedding'], threshold=threshold)
+        students = self.match_embedding(analysis["faces"][0]["embedding"], threshold=threshold)
         if students:
-            return {'status': 'matched', 'message': 'Recognized students found.', 'students': students[:5]}
-        return {'status': 'unknown', 'message': 'Face detected but not matched in embedding DB.', 'students': []}
+            return {"status": "matched", "message": "Recognized students found.", "students": students[:5]}
+        return {"status": "unknown", "message": "Face detected but not matched in embedding DB.", "students": []}

@@ -17,7 +17,7 @@ def _distance(left, right):
 
 
 def _format_time_label(timestamp):
-    return time.strftime('%H:%M:%S', time.localtime(timestamp))
+    return time.strftime("%H:%M:%S", time.localtime(timestamp))
 
 
 def _trim_time_series(points, now, window_seconds):
@@ -27,7 +27,7 @@ def _trim_time_series(points, now, window_seconds):
 
 def _trim_metric_rows(rows, now, window_seconds):
     threshold = float(now) - float(window_seconds)
-    return [item for item in rows if float(item.get('t', 0.0)) >= threshold]
+    return [item for item in rows if float(item.get("t", 0.0)) >= threshold]
 
 
 def _safe_mean(values):
@@ -61,14 +61,14 @@ class StudentMetricState:
     depth_baseline_cm: float | None = None
     metric_rows: dict = field(
         default_factory=lambda: {
-            'focus-ratio': [],
-            'head-stability': [],
-            'fatigue': [],
-            'posture-angle': [],
-            'desk-distance': [],
-            'stillness': [],
-            'hand-raise': [],
-            'shared-attention': [],
+            "focus-ratio": [],
+            "head-stability": [],
+            "fatigue": [],
+            "posture-angle": [],
+            "desk-distance": [],
+            "stillness": [],
+            "hand-raise": [],
+            "shared-attention": [],
         }
     )
 
@@ -79,24 +79,24 @@ class PoseDepthMetricEngine:
     HEAD_WINDOW_SECONDS = 12.0
     STILLNESS_WINDOW_SECONDS = 90.0
     HAND_RAISE_EVENT_COOLDOWN_SECONDS = 2.0
-    HAND_RAISE_MIN_HOLD_SECONDS = _env_float('KINECT_HAND_RAISE_MIN_HOLD_SECONDS', 0.60)
-    HAND_RAISE_KEYPOINT_MIN_CONFIDENCE = _env_float('KINECT_HAND_RAISE_KEYPOINT_MIN_CONFIDENCE', 0.20)
-    HAND_RAISE_WRIST_SHOULDER_MARGIN = _env_float('KINECT_HAND_RAISE_WRIST_SHOULDER_MARGIN', 0.18)
-    HAND_RAISE_STRICT_WRIST_SHOULDER_MARGIN = _env_float('KINECT_HAND_RAISE_STRICT_WRIST_SHOULDER_MARGIN', 0.32)
-    HAND_RAISE_WRIST_ELBOW_MARGIN = _env_float('KINECT_HAND_RAISE_WRIST_ELBOW_MARGIN', 0.08)
-    HAND_RAISE_MAX_ELBOW_BELOW_SHOULDER = _env_float('KINECT_HAND_RAISE_MAX_ELBOW_BELOW_SHOULDER', 0.12)
-    HAND_RAISE_MIN_FOREARM_VERTICAL_RATIO = _env_float('KINECT_HAND_RAISE_MIN_FOREARM_VERTICAL_RATIO', 0.42)
-    HAND_RAISE_MAX_WRIST_SHOULDER_X_RATIO = _env_float('KINECT_HAND_RAISE_MAX_WRIST_SHOULDER_X_RATIO', 1.35)
+    HAND_RAISE_MIN_HOLD_SECONDS = _env_float("KINECT_HAND_RAISE_MIN_HOLD_SECONDS", 0.60)
+    HAND_RAISE_KEYPOINT_MIN_CONFIDENCE = _env_float("KINECT_HAND_RAISE_KEYPOINT_MIN_CONFIDENCE", 0.20)
+    HAND_RAISE_WRIST_SHOULDER_MARGIN = _env_float("KINECT_HAND_RAISE_WRIST_SHOULDER_MARGIN", 0.18)
+    HAND_RAISE_STRICT_WRIST_SHOULDER_MARGIN = _env_float("KINECT_HAND_RAISE_STRICT_WRIST_SHOULDER_MARGIN", 0.32)
+    HAND_RAISE_WRIST_ELBOW_MARGIN = _env_float("KINECT_HAND_RAISE_WRIST_ELBOW_MARGIN", 0.08)
+    HAND_RAISE_MAX_ELBOW_BELOW_SHOULDER = _env_float("KINECT_HAND_RAISE_MAX_ELBOW_BELOW_SHOULDER", 0.12)
+    HAND_RAISE_MIN_FOREARM_VERTICAL_RATIO = _env_float("KINECT_HAND_RAISE_MIN_FOREARM_VERTICAL_RATIO", 0.42)
+    HAND_RAISE_MAX_WRIST_SHOULDER_X_RATIO = _env_float("KINECT_HAND_RAISE_MAX_WRIST_SHOULDER_X_RATIO", 1.35)
     DEPTH_SAMPLE_RADIUS = 7
     DEPTH_MIN_VALID_CM = 35.0
     DEPTH_MAX_VALID_CM = 450.0
-    DEPTH_DISTANCE_SCALE = _env_float('KINECT_DEPTH_DISTANCE_SCALE', 1.0)
-    DEPTH_DISTANCE_BIAS_CM = _env_float('KINECT_DEPTH_DISTANCE_BIAS_CM', 0.0)
-    DESK_DISTANCE_SCALE = _env_float('KINECT_DESK_DISTANCE_SCALE', 0.8)
-    DESK_DISTANCE_MIN_CM = _env_float('KINECT_DESK_DISTANCE_MIN_CM', 30.0)
-    DESK_DISTANCE_MAX_CM = _env_float('KINECT_DESK_DISTANCE_MAX_CM', 95.0)
-    STILLNESS_VELOCITY_THRESHOLD = _env_float('KINECT_STILLNESS_VELOCITY_THRESHOLD', 0.16)
-    STILLNESS_SCORE_SCALE = _env_float('KINECT_STILLNESS_SCORE_SCALE', 76.0)
+    DEPTH_DISTANCE_SCALE = _env_float("KINECT_DEPTH_DISTANCE_SCALE", 1.0)
+    DEPTH_DISTANCE_BIAS_CM = _env_float("KINECT_DEPTH_DISTANCE_BIAS_CM", 0.0)
+    DESK_DISTANCE_SCALE = _env_float("KINECT_DESK_DISTANCE_SCALE", 0.8)
+    DESK_DISTANCE_MIN_CM = _env_float("KINECT_DESK_DISTANCE_MIN_CM", 30.0)
+    DESK_DISTANCE_MAX_CM = _env_float("KINECT_DESK_DISTANCE_MAX_CM", 95.0)
+    STILLNESS_VELOCITY_THRESHOLD = _env_float("KINECT_STILLNESS_VELOCITY_THRESHOLD", 0.16)
+    STILLNESS_SCORE_SCALE = _env_float("KINECT_STILLNESS_SCORE_SCALE", 76.0)
     KINECT_RAW_MIN = 300.0
     KINECT_RAW_MAX = 1080.0
     KINECT_RAW_COEFF_A = -0.0030711016
@@ -165,14 +165,14 @@ class PoseDepthMetricEngine:
         if value <= 0:
             return None
 
-        if source_mode == 'kinect':
+        if source_mode == "kinect":
             if value < self.KINECT_RAW_MIN or value > self.KINECT_RAW_MAX:
                 return None
             denominator = (self.KINECT_RAW_COEFF_A * value) + self.KINECT_RAW_COEFF_B
             if denominator <= 0:
                 return None
             distance_cm = 100.0 / denominator
-        elif source_mode in {'kinect_v1_registered', 'kinect_v2'}:
+        elif source_mode in {"kinect_v1_registered", "kinect_v2"}:
             distance_cm = value / 10.0
         else:
             distance_cm = value / 10.0
@@ -182,12 +182,12 @@ class PoseDepthMetricEngine:
             return None
         return float(distance_cm)
 
-    def _depth_at(self, depth_frame, point, source_mode='kinect'):
+    def _depth_at(self, depth_frame, point, source_mode="kinect"):
         if depth_frame is None or point is None:
             return None
 
-        height = int(getattr(depth_frame, 'shape', [0, 0])[0] or 0)
-        width = int(getattr(depth_frame, 'shape', [0, 0])[1] or 0)
+        height = int(getattr(depth_frame, "shape", [0, 0])[0] or 0)
+        width = int(getattr(depth_frame, "shape", [0, 0])[1] or 0)
         if width <= 0 or height <= 0:
             return None
 
@@ -202,7 +202,7 @@ class PoseDepthMetricEngine:
             return None
 
         patch = depth_frame[y1:y2, x1:x2]
-        if patch is None or getattr(patch, 'size', 0) == 0:
+        if patch is None or getattr(patch, "size", 0) == 0:
             return None
 
         values_cm = []
@@ -229,7 +229,7 @@ class PoseDepthMetricEngine:
         if (trim_count * 2) >= len(values_cm):
             trimmed = values_cm
         else:
-            trimmed = values_cm[trim_count:len(values_cm) - trim_count]
+            trimmed = values_cm[trim_count : len(values_cm) - trim_count]
         if not trimmed:
             return None
         return float(trimmed[len(trimmed) // 2])
@@ -237,30 +237,29 @@ class PoseDepthMetricEngine:
     def _append_metric(self, rows, now, label, value):
         rows.append(
             {
-                't': float(now),
-                'time': _format_time_label(now),
-                'label': label,
-                'value': value,
+                "t": float(now),
+                "time": _format_time_label(now),
+                "label": label,
+                "value": value,
             }
         )
 
     def _derive_shared_attention_label(self, focus_score, yaw_proxy, nose_point, peer_centers, frame_width):
         if nose_point is None:
-            return '看別處'
+            return "看別處"
 
         if peer_centers:
             nearest_peer = min(peer_centers, key=lambda item: _distance(item, nose_point))
             peer_distance = _distance(nearest_peer, nose_point)
-            looking_towards_peer = (
-                (nearest_peer[0] > nose_point[0] and yaw_proxy > 0.22)
-                or (nearest_peer[0] < nose_point[0] and yaw_proxy < -0.22)
+            looking_towards_peer = (nearest_peer[0] > nose_point[0] and yaw_proxy > 0.22) or (
+                nearest_peer[0] < nose_point[0] and yaw_proxy < -0.22
             )
             if looking_towards_peer and peer_distance <= frame_width * 0.35:
-                return '看同學'
+                return "看同學"
 
         if focus_score >= 55.0:
-            return '看老師'
-        return '看別處'
+            return "看老師"
+        return "看別處"
 
     def _calculate_stillness_flag(self, state, keypoint_map, bbox_center, torso_length, now):
         if state.previous_frame_at <= 0.0:
@@ -289,9 +288,7 @@ class PoseDepthMetricEngine:
 
         keypoint_displacement = _safe_mean(displacement_values)
         center_displacement = (
-            _distance(bbox_center, state.previous_bbox_center)
-            if state.previous_bbox_center is not None
-            else 0.0
+            _distance(bbox_center, state.previous_bbox_center) if state.previous_bbox_center is not None else 0.0
         )
         if len(displacement_values) < 3:
             state.previous_keypoints = dict(keypoint_map)
@@ -315,44 +312,37 @@ class PoseDepthMetricEngine:
         shoulder_y = shoulder_point[1]
         wrist_y = wrist_point[1]
 
-        if abs(float(wrist_point[0]) - float(shoulder_point[0])) > body_scale * float(self.HAND_RAISE_MAX_WRIST_SHOULDER_X_RATIO):
+        if abs(float(wrist_point[0]) - float(shoulder_point[0])) > body_scale * float(
+            self.HAND_RAISE_MAX_WRIST_SHOULDER_X_RATIO
+        ):
             return False
 
-        wrist_above_shoulder = wrist_y < (
-            shoulder_y - (body_scale * float(self.HAND_RAISE_WRIST_SHOULDER_MARGIN))
-        )
+        wrist_above_shoulder = wrist_y < (shoulder_y - (body_scale * float(self.HAND_RAISE_WRIST_SHOULDER_MARGIN)))
         if not wrist_above_shoulder:
             return False
 
-        wrist_clearly_high = wrist_y < (
-            shoulder_y - (body_scale * float(self.HAND_RAISE_STRICT_WRIST_SHOULDER_MARGIN))
-        )
+        wrist_clearly_high = wrist_y < (shoulder_y - (body_scale * float(self.HAND_RAISE_STRICT_WRIST_SHOULDER_MARGIN)))
         elbow_y = elbow_point[1]
-        wrist_above_elbow = wrist_y < (
-            elbow_y - (body_scale * float(self.HAND_RAISE_WRIST_ELBOW_MARGIN))
-        )
+        wrist_above_elbow = wrist_y < (elbow_y - (body_scale * float(self.HAND_RAISE_WRIST_ELBOW_MARGIN)))
         if not wrist_above_elbow:
             return False
 
         forearm_length = max(1.0, _distance(wrist_point, elbow_point))
         forearm_vertical_ratio = (float(elbow_y) - float(wrist_y)) / forearm_length
-        if (
-            forearm_vertical_ratio < float(self.HAND_RAISE_MIN_FOREARM_VERTICAL_RATIO)
-            and not wrist_clearly_high
-        ):
+        if forearm_vertical_ratio < float(self.HAND_RAISE_MIN_FOREARM_VERTICAL_RATIO) and not wrist_clearly_high:
             return False
 
-        elbow_not_drooping = elbow_y < (
-            shoulder_y + (body_scale * float(self.HAND_RAISE_MAX_ELBOW_BELOW_SHOULDER))
-        )
+        elbow_not_drooping = elbow_y < (shoulder_y + (body_scale * float(self.HAND_RAISE_MAX_ELBOW_BELOW_SHOULDER)))
         return bool(elbow_not_drooping or wrist_clearly_high)
 
-    def update_student(self, user_id, frame_shape, bbox, pose_detection, depth_frame, depth_source_mode, peer_centers, now):
+    def update_student(
+        self, user_id, frame_shape, bbox, pose_detection, depth_frame, depth_source_mode, peer_centers, now
+    ):
         state = self._get_state(user_id)
         state.last_update_at = float(now)
 
-        keypoints = pose_detection.get('keypoints') if pose_detection else None
-        keypoint_confidence = pose_detection.get('keypoint_conf') if pose_detection else None
+        keypoints = pose_detection.get("keypoints") if pose_detection else None
+        keypoint_confidence = pose_detection.get("keypoint_conf") if pose_detection else None
         keypoint_map = {}
 
         nose_point = self._point_from_keypoint(keypoints, keypoint_confidence, self.COCO_NOSE)
@@ -414,7 +404,9 @@ class PoseDepthMetricEngine:
         focus_target = (frame_shape[1] * 0.5, frame_shape[0] * 0.2)
         focus_distance_ratio = _clamp(_distance(nose_point, focus_target) / max(1.0, frame_shape[1] * 0.55), 0.0, 1.0)
         focus_orientation_penalty = _clamp(abs(yaw_proxy), 0.0, 1.0)
-        focus_score = _clamp((1.0 - (0.55 * focus_distance_ratio + 0.45 * focus_orientation_penalty)) * 100.0, 0.0, 100.0)
+        focus_score = _clamp(
+            (1.0 - (0.55 * focus_distance_ratio + 0.45 * focus_orientation_penalty)) * 100.0, 0.0, 100.0
+        )
 
         state.head_pose_window.append((float(now), float(yaw_proxy), float(pitch_proxy)))
         state.head_pose_window = _trim_time_series(state.head_pose_window, now, self.HEAD_WINDOW_SECONDS)
@@ -425,7 +417,9 @@ class PoseDepthMetricEngine:
         trunk_dx = shoulder_center[0] - hip_center[0]
         trunk_dy = max(1.0, hip_center[1] - shoulder_center[1])
         posture_angle = _clamp(abs(math.degrees(math.atan2(trunk_dx, trunk_dy))), 0.0, 45.0)
-        head_drop_ratio = _clamp((nose_point[1] - (shoulder_center[1] - torso_length * 0.58)) / max(10.0, torso_length * 0.92), 0.0, 1.0)
+        head_drop_ratio = _clamp(
+            (nose_point[1] - (shoulder_center[1] - torso_length * 0.58)) / max(10.0, torso_length * 0.92), 0.0, 1.0
+        )
 
         depth_cm = self._depth_at(depth_frame, nose_point, source_mode=depth_source_mode)
         if depth_cm is None:
@@ -450,7 +444,7 @@ class PoseDepthMetricEngine:
         state.stillness_window.append((float(now), _clamp(daze_sample, 0.0, 1.0)))
         state.stillness_window = _trim_time_series(state.stillness_window, now, self.STILLNESS_WINDOW_SECONDS)
         stillness_ratio = _safe_mean([item[1] for item in state.stillness_window])
-        stillness_score = _clamp((stillness_ratio ** 1.15) * float(self.STILLNESS_SCORE_SCALE), 0.0, 100.0)
+        stillness_score = _clamp((stillness_ratio**1.15) * float(self.STILLNESS_SCORE_SCALE), 0.0, 100.0)
 
         fatigue_score = _clamp((head_drop_ratio * 0.65 + (stillness_score / 100.0) * 0.35) * 100.0, 0.0, 100.0)
 
@@ -541,16 +535,16 @@ class PoseDepthMetricEngine:
         state.last_emit_at = float(now)
         time_label = _format_time_label(now)
 
-        self._append_metric(state.metric_rows['focus-ratio'], now, time_label, round(focus_score, 1))
-        self._append_metric(state.metric_rows['head-stability'], now, time_label, round(head_stability, 1))
-        self._append_metric(state.metric_rows['fatigue'], now, time_label, round(fatigue_score, 1))
-        self._append_metric(state.metric_rows['posture-angle'], now, time_label, round(posture_angle, 1))
-        self._append_metric(state.metric_rows['desk-distance'], now, time_label, round(desk_distance, 1))
-        self._append_metric(state.metric_rows['stillness'], now, time_label, round(stillness_score, 1))
+        self._append_metric(state.metric_rows["focus-ratio"], now, time_label, round(focus_score, 1))
+        self._append_metric(state.metric_rows["head-stability"], now, time_label, round(head_stability, 1))
+        self._append_metric(state.metric_rows["fatigue"], now, time_label, round(fatigue_score, 1))
+        self._append_metric(state.metric_rows["posture-angle"], now, time_label, round(posture_angle, 1))
+        self._append_metric(state.metric_rows["desk-distance"], now, time_label, round(desk_distance, 1))
+        self._append_metric(state.metric_rows["stillness"], now, time_label, round(stillness_score, 1))
         hand_raise_count = int(state.hand_raise_pending_events)
-        self._append_metric(state.metric_rows['hand-raise'], now, time_label, hand_raise_count)
+        self._append_metric(state.metric_rows["hand-raise"], now, time_label, hand_raise_count)
         state.hand_raise_pending_events = 0
-        self._append_metric(state.metric_rows['shared-attention'], now, shared_attention_label, 1)
+        self._append_metric(state.metric_rows["shared-attention"], now, shared_attention_label, 1)
 
         for key in tuple(state.metric_rows.keys()):
             state.metric_rows[key] = _trim_metric_rows(state.metric_rows[key], now, self.HISTORY_SECONDS)
@@ -562,9 +556,9 @@ class PoseDepthMetricEngine:
         return {
             key: [
                 {
-                    'time': row['time'],
-                    'label': row['label'],
-                    'value': row['value'],
+                    "time": row["time"],
+                    "label": row["label"],
+                    "value": row["value"],
                 }
                 for row in value
             ]

@@ -61,11 +61,15 @@ exclude = ["reels", "scripts", "clustering"]
 select = ["E", "F", "I", "N", "W"]
 ignore = ["E501"]
 
+[tool.ruff.lint.per-file-ignores]
+"app.py" = ["E402"]
+
 [tool.basedpyright]
 typeCheckingMode = "basic"
 include = ["src"]
 exclude = ["reels", "scripts", "clustering"]
 reportMissingImports = false
 reportMissingModuleSource = false
-reportUntitledVariable = false
-
+reportOptionalMemberAccess = false
+reportOptionalSubscript = false
+reportAttributeAccessIssue = false

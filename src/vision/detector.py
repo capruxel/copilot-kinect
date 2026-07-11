@@ -5,11 +5,11 @@ from pathlib import Path
 
 
 def _env_float(name, default):
-    raw = os.getenv(name, '')
+    raw = os.getenv(name, "")
     if raw is None:
         return float(default)
     raw = str(raw).strip()
-    if raw == '':
+    if raw == "":
         return float(default)
     try:
         return float(raw)
@@ -18,25 +18,25 @@ def _env_float(name, default):
 
 
 def _env_bool(name, default):
-    raw = os.getenv(name, '')
+    raw = os.getenv(name, "")
     if raw is None:
         return bool(default)
     raw = str(raw).strip().lower()
-    if raw == '':
+    if raw == "":
         return bool(default)
-    if raw in {'1', 'true', 'yes', 'on'}:
+    if raw in {"1", "true", "yes", "on"}:
         return True
-    if raw in {'0', 'false', 'no', 'off'}:
+    if raw in {"0", "false", "no", "off"}:
         return False
     return bool(default)
 
 
 def _env_int(name, default):
-    raw = os.getenv(name, '')
+    raw = os.getenv(name, "")
     if raw is None:
         return int(default)
     raw = str(raw).strip()
-    if raw == '':
+    if raw == "":
         return int(default)
     try:
         return int(raw)
@@ -47,7 +47,7 @@ def _env_int(name, default):
 class PersonDetector:
     PERSON_CLASS_ID = 0
     YOLO_DETECT_INTERVAL = 0.18
-    TRACKED_YOLO_DETECT_INTERVAL = _env_float('ATTENDANCE_TRACKED_DETECT_INTERVAL', 0.32)
+    TRACKED_YOLO_DETECT_INTERVAL = _env_float("ATTENDANCE_TRACKED_DETECT_INTERVAL", 0.32)
     YOLO_IMAGE_SIZE = 640
     YOLO_CONFIDENCE = 0.22
     YOLO_WARMUP_CONFIDENCE = 0.30
@@ -68,40 +68,40 @@ class PersonDetector:
     FACE_ANALYSIS_MAX_SIDE = 384
     FACE_REGION_TOP_RATIO = 0.02
     FACE_REGION_BOTTOM_RATIO = 0.64
-    FACE_PERSON_FALLBACK_ENABLED = _env_bool('ATTENDANCE_FACE_PERSON_FALLBACK_ENABLED', True)
-    FACE_PERSON_FALLBACK_INTERVAL = _env_float('ATTENDANCE_FACE_PERSON_FALLBACK_INTERVAL', 0.70)
-    FACE_PERSON_FALLBACK_MIN_SCORE = _env_float('ATTENDANCE_FACE_PERSON_FALLBACK_MIN_SCORE', 0.50)
-    FACE_PERSON_FALLBACK_MIN_SIZE = _env_float('ATTENDANCE_FACE_PERSON_FALLBACK_MIN_SIZE', 12.0)
-    FACE_PERSON_FALLBACK_MAX_WIDTH = _env_int('ATTENDANCE_FACE_PERSON_FALLBACK_MAX_WIDTH', 960)
-    FACE_PERSON_FALLBACK_SKIP_UNTIL_READY = _env_bool('ATTENDANCE_FACE_PERSON_FALLBACK_SKIP_UNTIL_READY', True)
-    FACE_PERSON_FALLBACK_BOX_SCALE_X = _env_float('ATTENDANCE_FACE_PERSON_FALLBACK_BOX_SCALE_X', 3.0)
-    FACE_PERSON_FALLBACK_BOX_TOP_SCALE = _env_float('ATTENDANCE_FACE_PERSON_FALLBACK_BOX_TOP_SCALE', 0.45)
-    FACE_PERSON_FALLBACK_BOX_BOTTOM_SCALE = _env_float('ATTENDANCE_FACE_PERSON_FALLBACK_BOX_BOTTOM_SCALE', 2.35)
+    FACE_PERSON_FALLBACK_ENABLED = _env_bool("ATTENDANCE_FACE_PERSON_FALLBACK_ENABLED", True)
+    FACE_PERSON_FALLBACK_INTERVAL = _env_float("ATTENDANCE_FACE_PERSON_FALLBACK_INTERVAL", 0.70)
+    FACE_PERSON_FALLBACK_MIN_SCORE = _env_float("ATTENDANCE_FACE_PERSON_FALLBACK_MIN_SCORE", 0.50)
+    FACE_PERSON_FALLBACK_MIN_SIZE = _env_float("ATTENDANCE_FACE_PERSON_FALLBACK_MIN_SIZE", 12.0)
+    FACE_PERSON_FALLBACK_MAX_WIDTH = _env_int("ATTENDANCE_FACE_PERSON_FALLBACK_MAX_WIDTH", 960)
+    FACE_PERSON_FALLBACK_SKIP_UNTIL_READY = _env_bool("ATTENDANCE_FACE_PERSON_FALLBACK_SKIP_UNTIL_READY", True)
+    FACE_PERSON_FALLBACK_BOX_SCALE_X = _env_float("ATTENDANCE_FACE_PERSON_FALLBACK_BOX_SCALE_X", 3.0)
+    FACE_PERSON_FALLBACK_BOX_TOP_SCALE = _env_float("ATTENDANCE_FACE_PERSON_FALLBACK_BOX_TOP_SCALE", 0.45)
+    FACE_PERSON_FALLBACK_BOX_BOTTOM_SCALE = _env_float("ATTENDANCE_FACE_PERSON_FALLBACK_BOX_BOTTOM_SCALE", 2.35)
     DEPTH_SAMPLE_RADIUS = 7
     DEPTH_SMOOTHING_ALPHA = 0.38
     DEPTH_SMOOTHING_FAST_ALPHA = 0.64
     DEPTH_FAST_JUMP_CM = 45.0
     DEPTH_MIN_VALID_CM = 35.0
     DEPTH_MAX_VALID_CM = 450.0
-    DEPTH_DISTANCE_SCALE = _env_float('KINECT_DEPTH_DISTANCE_SCALE', 1.0)
-    DEPTH_DISTANCE_BIAS_CM = _env_float('KINECT_DEPTH_DISTANCE_BIAS_CM', 0.0)
-    POSE_DEPTH_FUSION_ENABLED = _env_bool('KINECT_POSE_DEPTH_FUSION_ENABLED', True)
-    POSE_DEPTH_FUSION_MIN_CONFIDENCE = _env_float('KINECT_POSE_DEPTH_FUSION_MIN_CONFIDENCE', 0.12)
-    POSE_DEPTH_FUSION_OUTLIER_CM = _env_float('KINECT_POSE_DEPTH_FUSION_OUTLIER_CM', 72.0)
-    POSE_DEPTH_FUSION_OUTLIER_CONF_MAX = _env_float('KINECT_POSE_DEPTH_FUSION_OUTLIER_CONF_MAX', 0.55)
-    POSE_DEPTH_FUSION_BASE_ALPHA = _env_float('KINECT_POSE_DEPTH_FUSION_BASE_ALPHA', 0.62)
-    POSE_DEPTH_FUSION_FAST_ALPHA = _env_float('KINECT_POSE_DEPTH_FUSION_FAST_ALPHA', 0.42)
-    POSE_DEPTH_FUSION_OUTLIER_ALPHA = _env_float('KINECT_POSE_DEPTH_FUSION_OUTLIER_ALPHA', 0.24)
-    POSE_DEPTH_FUSION_DEPTH_JUMP_CM = _env_float('KINECT_POSE_DEPTH_FUSION_DEPTH_JUMP_CM', 18.0)
-    POSE_DEPTH_FUSION_DEPTH_JUMP_ALPHA = _env_float('KINECT_POSE_DEPTH_FUSION_DEPTH_JUMP_ALPHA', 0.35)
-    POSE_DEPTH_FUSION_DISP_NORM_FAST = _env_float('KINECT_POSE_DEPTH_FUSION_DISP_NORM_FAST', 0.16)
-    POSE_DEPTH_FUSION_TRACK_MAX_AGE_SECONDS = _env_float('KINECT_POSE_DEPTH_FUSION_TRACK_MAX_AGE_SECONDS', 1.8)
-    POSE_DEPTH_FUSION_HOLD_SECONDS = _env_float('KINECT_POSE_DEPTH_FUSION_HOLD_SECONDS', 0.22)
-    POSE_DEPTH_FUSION_HOLD_MIN_CONF = _env_float('KINECT_POSE_DEPTH_FUSION_HOLD_MIN_CONF', 0.18)
-    POSE_DEPTH_FUSION_HOLD_DECAY = _env_float('KINECT_POSE_DEPTH_FUSION_HOLD_DECAY', 0.85)
-    POSE_DEPTH_FUSION_HOLD_FLOOR = _env_float('KINECT_POSE_DEPTH_FUSION_HOLD_FLOOR', 0.10)
-    POSE_DEPTH_FUSION_TRACK_MATCH_IOU = _env_float('KINECT_POSE_DEPTH_FUSION_TRACK_MATCH_IOU', 0.10)
-    POSE_DEPTH_FUSION_TRACK_MATCH_CENTER_RATIO = _env_float('KINECT_POSE_DEPTH_FUSION_TRACK_MATCH_CENTER_RATIO', 0.55)
+    DEPTH_DISTANCE_SCALE = _env_float("KINECT_DEPTH_DISTANCE_SCALE", 1.0)
+    DEPTH_DISTANCE_BIAS_CM = _env_float("KINECT_DEPTH_DISTANCE_BIAS_CM", 0.0)
+    POSE_DEPTH_FUSION_ENABLED = _env_bool("KINECT_POSE_DEPTH_FUSION_ENABLED", True)
+    POSE_DEPTH_FUSION_MIN_CONFIDENCE = _env_float("KINECT_POSE_DEPTH_FUSION_MIN_CONFIDENCE", 0.12)
+    POSE_DEPTH_FUSION_OUTLIER_CM = _env_float("KINECT_POSE_DEPTH_FUSION_OUTLIER_CM", 72.0)
+    POSE_DEPTH_FUSION_OUTLIER_CONF_MAX = _env_float("KINECT_POSE_DEPTH_FUSION_OUTLIER_CONF_MAX", 0.55)
+    POSE_DEPTH_FUSION_BASE_ALPHA = _env_float("KINECT_POSE_DEPTH_FUSION_BASE_ALPHA", 0.62)
+    POSE_DEPTH_FUSION_FAST_ALPHA = _env_float("KINECT_POSE_DEPTH_FUSION_FAST_ALPHA", 0.42)
+    POSE_DEPTH_FUSION_OUTLIER_ALPHA = _env_float("KINECT_POSE_DEPTH_FUSION_OUTLIER_ALPHA", 0.24)
+    POSE_DEPTH_FUSION_DEPTH_JUMP_CM = _env_float("KINECT_POSE_DEPTH_FUSION_DEPTH_JUMP_CM", 18.0)
+    POSE_DEPTH_FUSION_DEPTH_JUMP_ALPHA = _env_float("KINECT_POSE_DEPTH_FUSION_DEPTH_JUMP_ALPHA", 0.35)
+    POSE_DEPTH_FUSION_DISP_NORM_FAST = _env_float("KINECT_POSE_DEPTH_FUSION_DISP_NORM_FAST", 0.16)
+    POSE_DEPTH_FUSION_TRACK_MAX_AGE_SECONDS = _env_float("KINECT_POSE_DEPTH_FUSION_TRACK_MAX_AGE_SECONDS", 1.8)
+    POSE_DEPTH_FUSION_HOLD_SECONDS = _env_float("KINECT_POSE_DEPTH_FUSION_HOLD_SECONDS", 0.22)
+    POSE_DEPTH_FUSION_HOLD_MIN_CONF = _env_float("KINECT_POSE_DEPTH_FUSION_HOLD_MIN_CONF", 0.18)
+    POSE_DEPTH_FUSION_HOLD_DECAY = _env_float("KINECT_POSE_DEPTH_FUSION_HOLD_DECAY", 0.85)
+    POSE_DEPTH_FUSION_HOLD_FLOOR = _env_float("KINECT_POSE_DEPTH_FUSION_HOLD_FLOOR", 0.10)
+    POSE_DEPTH_FUSION_TRACK_MATCH_IOU = _env_float("KINECT_POSE_DEPTH_FUSION_TRACK_MATCH_IOU", 0.10)
+    POSE_DEPTH_FUSION_TRACK_MATCH_CENTER_RATIO = _env_float("KINECT_POSE_DEPTH_FUSION_TRACK_MATCH_CENTER_RATIO", 0.55)
     KINECT_RAW_MIN = 300.0
     KINECT_RAW_MAX = 1080.0
     KINECT_RAW_COEFF_A = -0.0030711016
@@ -125,40 +125,40 @@ class PersonDetector:
         (2, 4),
     )
     MODEL_CANDIDATES = (
-        ('yolo26x-pose', 'models/yolo/yolo26x-pose.pt', True),
-        ('yolo26s-pose', 'models/yolo/yolo26s-pose.pt', True),
-        ('yolo26n-pose', 'models/yolo/yolo26n-pose.pt', True),
-        ('yolo11n-pose', 'models/yolo/yolo11n-pose.pt', True),
-        ('yolov8n-pose', 'models/yolo/yolov8n-pose.pt', True),
-        ('yolo11n-pose', 'yolo11n-pose.pt', False),
-        ('yolov8n-pose', 'yolov8n-pose.pt', False),
+        ("yolo26x-pose", "models/yolo/yolo26x-pose.pt", True),
+        ("yolo26s-pose", "models/yolo/yolo26s-pose.pt", True),
+        ("yolo26n-pose", "models/yolo/yolo26n-pose.pt", True),
+        ("yolo11n-pose", "models/yolo/yolo11n-pose.pt", True),
+        ("yolov8n-pose", "models/yolo/yolov8n-pose.pt", True),
+        ("yolo11n-pose", "yolo11n-pose.pt", False),
+        ("yolov8n-pose", "yolov8n-pose.pt", False),
     )
     RUNTIME_TUNING_FIELDS = {
-        'max_inference_width': int,
-        'yolo_image_size': int,
-        'yolo_detect_interval': float,
-        'tracked_yolo_detect_interval': float,
-        'yolo_confidence': float,
-        'track_iou_threshold': float,
-        'max_detections': int,
-        'min_person_box_width': float,
-        'min_person_box_height': float,
-        'detection_duplicate_iou_threshold': float,
-        'detection_duplicate_center_ratio': float,
-        'detection_duplicate_area_ratio': float,
-        'face_person_fallback_interval': float,
-        'face_person_fallback_min_score': float,
-        'face_person_fallback_min_size': float,
-        'face_person_fallback_max_width': int,
-        'face_person_fallback_box_scale_x': float,
-        'face_person_fallback_box_top_scale': float,
-        'face_person_fallback_box_bottom_scale': float,
+        "max_inference_width": int,
+        "yolo_image_size": int,
+        "yolo_detect_interval": float,
+        "tracked_yolo_detect_interval": float,
+        "yolo_confidence": float,
+        "track_iou_threshold": float,
+        "max_detections": int,
+        "min_person_box_width": float,
+        "min_person_box_height": float,
+        "detection_duplicate_iou_threshold": float,
+        "detection_duplicate_center_ratio": float,
+        "detection_duplicate_area_ratio": float,
+        "face_person_fallback_interval": float,
+        "face_person_fallback_min_score": float,
+        "face_person_fallback_min_size": float,
+        "face_person_fallback_max_width": int,
+        "face_person_fallback_box_scale_x": float,
+        "face_person_fallback_box_top_scale": float,
+        "face_person_fallback_box_bottom_scale": float,
     }
 
     def __init__(self, base_dir, face_db=None):
         self.base_dir = Path(base_dir)
         self.face_db = face_db
-        self._runtime_tuning_file = self.base_dir / 'data' / 'runtime_tuning_profile.json'
+        self._runtime_tuning_file = self.base_dir / "data" / "runtime_tuning_profile.json"
         self._cv_modules = None
         self._yolo_model = None
         self._yolo_error = None
@@ -187,21 +187,22 @@ class PersonDetector:
         return self._cv_modules
 
     def _resolve_yolo_device(self):
-        raw_device = str(os.getenv('YOLO_DEVICE', 'auto')).strip()
-        if raw_device and raw_device.lower() != 'auto':
+        raw_device = str(os.getenv("YOLO_DEVICE", "auto")).strip()
+        if raw_device and raw_device.lower() != "auto":
             return raw_device
 
         try:
             import torch  # pylint: disable=import-outside-toplevel
+
             if torch.cuda.is_available():
                 return 0
         except Exception:
             pass
-        return 'cpu'
+        return "cpu"
 
     def _yolo_device_label(self):
         if self._yolo_device == 0:
-            return 'cuda:0'
+            return "cuda:0"
         return str(self._yolo_device)
 
     def _run_yolo_person_inference(self, frame, conf, max_det):
@@ -234,7 +235,7 @@ class PersonDetector:
 
                 selected_model_ref = None
                 model_candidates = list(self.MODEL_CANDIDATES)
-                model_override = str(os.getenv('YOLO_POSE_MODEL', '')).strip()
+                model_override = str(os.getenv("YOLO_POSE_MODEL", "")).strip()
                 if model_override:
                     override_path = Path(model_override)
                     if not override_path.is_absolute():
@@ -260,11 +261,11 @@ class PersonDetector:
                     break
 
                 if selected_model_ref is None:
-                    raise FileNotFoundError('No YOLO pose model was found.')
+                    raise FileNotFoundError("No YOLO pose model was found.")
 
                 self._yolo_model = YOLO(selected_model_ref)
             except Exception as exc:
-                self._yolo_error = f'YOLO is not available: {exc}'
+                self._yolo_error = f"YOLO is not available: {exc}"
                 raise RuntimeError(self._yolo_error) from exc
         return self._yolo_model
 
@@ -282,40 +283,40 @@ class PersonDetector:
 
     def apply_runtime_tuning_profile(self, profile_data=None):
         if profile_data is not None:
-            params = profile_data.get('best_params') or profile_data.get('params') or profile_data
+            params = profile_data.get("best_params") or profile_data.get("params") or profile_data
         else:
             if not self._runtime_tuning_file.exists():
                 return
             try:
-                with self._runtime_tuning_file.open('r', encoding='utf-8') as profile_file:
+                with self._runtime_tuning_file.open("r", encoding="utf-8") as profile_file:
                     payload = json.load(profile_file)
             except Exception:
                 return
-            params = payload.get('best_params') or payload.get('params') or payload
+            params = payload.get("best_params") or payload.get("params") or payload
 
         if not isinstance(params, dict):
             return
 
         field_to_attr = {
-            'max_inference_width': 'MAX_INFERENCE_WIDTH',
-            'yolo_image_size': 'YOLO_IMAGE_SIZE',
-            'yolo_detect_interval': 'YOLO_DETECT_INTERVAL',
-            'tracked_yolo_detect_interval': 'TRACKED_YOLO_DETECT_INTERVAL',
-            'yolo_confidence': 'YOLO_CONFIDENCE',
-            'track_iou_threshold': 'TRACK_IOU_THRESHOLD',
-            'max_detections': 'MAX_DETECTIONS',
-            'min_person_box_width': 'MIN_PERSON_BOX_WIDTH',
-            'min_person_box_height': 'MIN_PERSON_BOX_HEIGHT',
-            'detection_duplicate_iou_threshold': 'DETECTION_DUPLICATE_IOU_THRESHOLD',
-            'detection_duplicate_center_ratio': 'DETECTION_DUPLICATE_CENTER_RATIO',
-            'detection_duplicate_area_ratio': 'DETECTION_DUPLICATE_AREA_RATIO',
-            'face_person_fallback_interval': 'FACE_PERSON_FALLBACK_INTERVAL',
-            'face_person_fallback_min_score': 'FACE_PERSON_FALLBACK_MIN_SCORE',
-            'face_person_fallback_min_size': 'FACE_PERSON_FALLBACK_MIN_SIZE',
-            'face_person_fallback_max_width': 'FACE_PERSON_FALLBACK_MAX_WIDTH',
-            'face_person_fallback_box_scale_x': 'FACE_PERSON_FALLBACK_BOX_SCALE_X',
-            'face_person_fallback_box_top_scale': 'FACE_PERSON_FALLBACK_BOX_TOP_SCALE',
-            'face_person_fallback_box_bottom_scale': 'FACE_PERSON_FALLBACK_BOX_BOTTOM_SCALE',
+            "max_inference_width": "MAX_INFERENCE_WIDTH",
+            "yolo_image_size": "YOLO_IMAGE_SIZE",
+            "yolo_detect_interval": "YOLO_DETECT_INTERVAL",
+            "tracked_yolo_detect_interval": "TRACKED_YOLO_DETECT_INTERVAL",
+            "yolo_confidence": "YOLO_CONFIDENCE",
+            "track_iou_threshold": "TRACK_IOU_THRESHOLD",
+            "max_detections": "MAX_DETECTIONS",
+            "min_person_box_width": "MIN_PERSON_BOX_WIDTH",
+            "min_person_box_height": "MIN_PERSON_BOX_HEIGHT",
+            "detection_duplicate_iou_threshold": "DETECTION_DUPLICATE_IOU_THRESHOLD",
+            "detection_duplicate_center_ratio": "DETECTION_DUPLICATE_CENTER_RATIO",
+            "detection_duplicate_area_ratio": "DETECTION_DUPLICATE_AREA_RATIO",
+            "face_person_fallback_interval": "FACE_PERSON_FALLBACK_INTERVAL",
+            "face_person_fallback_min_score": "FACE_PERSON_FALLBACK_MIN_SCORE",
+            "face_person_fallback_min_size": "FACE_PERSON_FALLBACK_MIN_SIZE",
+            "face_person_fallback_max_width": "FACE_PERSON_FALLBACK_MAX_WIDTH",
+            "face_person_fallback_box_scale_x": "FACE_PERSON_FALLBACK_BOX_SCALE_X",
+            "face_person_fallback_box_top_scale": "FACE_PERSON_FALLBACK_BOX_TOP_SCALE",
+            "face_person_fallback_box_bottom_scale": "FACE_PERSON_FALLBACK_BOX_BOTTOM_SCALE",
         }
 
         for field_name, cast in self.RUNTIME_TUNING_FIELDS.items():
@@ -363,14 +364,20 @@ class PersonDetector:
             return 0.0
 
         inter_area = (right - left) * (bottom - top)
-        left_area = max(0.0, float(left_bbox[2]) - float(left_bbox[0])) * max(0.0, float(left_bbox[3]) - float(left_bbox[1]))
-        right_area = max(0.0, float(right_bbox[2]) - float(right_bbox[0])) * max(0.0, float(right_bbox[3]) - float(right_bbox[1]))
+        left_area = max(0.0, float(left_bbox[2]) - float(left_bbox[0])) * max(
+            0.0, float(left_bbox[3]) - float(left_bbox[1])
+        )
+        right_area = max(0.0, float(right_bbox[2]) - float(right_bbox[0])) * max(
+            0.0, float(right_bbox[3]) - float(right_bbox[1])
+        )
         min_area = min(left_area, right_area)
         if min_area <= 0.0:
             return 0.0
         return inter_area / min_area
 
-    def _boxes_likely_same_person(self, left_bbox, right_bbox, iou_threshold, center_ratio, area_ratio_limit, overlap_ratio):
+    def _boxes_likely_same_person(
+        self, left_bbox, right_bbox, iou_threshold, center_ratio, area_ratio_limit, overlap_ratio
+    ):
         iou = self._bbox_iou(left_bbox, right_bbox)
         if iou >= float(iou_threshold):
             return True
@@ -420,9 +427,9 @@ class PersonDetector:
         candidates = []
         keypoints_xy = None
         keypoints_conf = None
-        if getattr(result, 'keypoints', None) is not None:
-            keypoints_xy = getattr(result.keypoints, 'xy', None)
-            keypoints_conf = getattr(result.keypoints, 'conf', None)
+        if getattr(result, "keypoints", None) is not None:
+            keypoints_xy = getattr(result.keypoints, "xy", None)
+            keypoints_conf = getattr(result.keypoints, "conf", None)
 
         for index, box in enumerate(result.boxes):
             xyxy = [float(value) * factor for value in box.xyxy[0].tolist()]
@@ -450,10 +457,10 @@ class PersonDetector:
 
             candidates.append(
                 {
-                    'bbox': xyxy,
-                    'confidence': confidence,
-                    'keypoints': pose_points,
-                    'keypoint_conf': pose_confidence,
+                    "bbox": xyxy,
+                    "confidence": confidence,
+                    "keypoints": pose_points,
+                    "keypoint_conf": pose_confidence,
                 }
             )
         return candidates
@@ -484,7 +491,7 @@ class PersonDetector:
             return []
 
         if self.FACE_PERSON_FALLBACK_SKIP_UNTIL_READY:
-            is_ready = getattr(self.face_db, 'is_analysis_ready', lambda: True)
+            is_ready = getattr(self.face_db, "is_analysis_ready", lambda: True)
             if not is_ready():
                 return []
 
@@ -492,11 +499,11 @@ class PersonDetector:
         if self._last_face_person_boxes and now - self._last_face_person_fallback_at < interval:
             return [
                 {
-                    'bbox': list(bbox),
-                    'confidence': max(0.0, float(self.FACE_PERSON_FALLBACK_MIN_SCORE)),
-                    'keypoints': [],
-                    'keypoint_conf': [],
-                    'source': 'face_fallback',
+                    "bbox": list(bbox),
+                    "confidence": max(0.0, float(self.FACE_PERSON_FALLBACK_MIN_SCORE)),
+                    "keypoints": [],
+                    "keypoint_conf": [],
+                    "source": "face_fallback",
                 }
                 for bbox in self._last_face_person_boxes
             ]
@@ -517,19 +524,19 @@ class PersonDetector:
             analysis = self.face_db.analyze_faces(analyze_frame)
         except Exception:
             return []
-        if analysis.get('status') != 'ok':
+        if analysis.get("status") != "ok":
             return []
 
         scale_back = (1.0 / analysis_scale) if analysis_scale > 0 else 1.0
-        existing_boxes = [item['bbox'] for item in existing_candidates]
+        existing_boxes = [item["bbox"] for item in existing_candidates]
         candidates = []
-        for face in analysis.get('faces') or []:
-            face_bbox = face.get('bbox') or []
+        for face in analysis.get("faces") or []:
+            face_bbox = face.get("bbox") or []
             if len(face_bbox) != 4:
                 continue
             if scale_back != 1.0:
                 face_bbox = [float(value) * scale_back for value in face_bbox]
-            det_score = float(face.get('det_score', 0.0))
+            det_score = float(face.get("det_score", 0.0))
             if det_score < float(self.FACE_PERSON_FALLBACK_MIN_SCORE):
                 continue
 
@@ -541,9 +548,8 @@ class PersonDetector:
             face_center = self._bbox_center(face_bbox)
             face_inside_existing = False
             for bbox in existing_boxes:
-                if (
-                    float(bbox[0]) <= face_center[0] <= float(bbox[2])
-                    and float(bbox[1]) <= face_center[1] <= float(bbox[3])
+                if float(bbox[0]) <= face_center[0] <= float(bbox[2]) and float(bbox[1]) <= face_center[1] <= float(
+                    bbox[3]
                 ):
                     face_inside_existing = True
                     break
@@ -558,19 +564,19 @@ class PersonDetector:
             self._last_face_person_boxes.append(list(person_bbox))
             candidates.append(
                 {
-                    'bbox': person_bbox,
-                    'confidence': det_score,
-                    'keypoints': [],
-                    'keypoint_conf': [],
-                    'source': 'face_fallback',
+                    "bbox": person_bbox,
+                    "confidence": det_score,
+                    "keypoints": [],
+                    "keypoint_conf": [],
+                    "source": "face_fallback",
                 }
             )
 
         return candidates
 
     def _coerce_pose_arrays(self, detection, min_length=17):
-        keypoints = detection.get('keypoints') or []
-        keypoint_conf = detection.get('keypoint_conf') or []
+        keypoints = detection.get("keypoints") or []
+        keypoint_conf = detection.get("keypoint_conf") or []
         target_length = max(min_length, len(keypoints), len(keypoint_conf))
         normalized_points = []
         normalized_conf = []
@@ -632,17 +638,17 @@ class PersonDetector:
 
         candidates = []
         for detection_index, detection in enumerate(detections):
-            detection_bbox = detection.get('bbox')
+            detection_bbox = detection.get("bbox")
             if detection_bbox is None:
                 continue
             detection_side = max(1.0, self._bbox_max_side(detection_bbox))
 
             for track_id, state in self._pose_fusion_tracks.items():
-                age = float(now) - float(state.get('updated_at', 0.0))
+                age = float(now) - float(state.get("updated_at", 0.0))
                 if age > self.POSE_DEPTH_FUSION_TRACK_MAX_AGE_SECONDS:
                     continue
 
-                track_bbox = state.get('bbox')
+                track_bbox = state.get("bbox")
                 if track_bbox is None:
                     continue
 
@@ -677,12 +683,12 @@ class PersonDetector:
         depth_profile = self._pose_depth_profile(keypoints, keypoint_conf, depth_frame, source_mode)
         torso_depth = self._pose_torso_depth_cm(depth_profile)
 
-        previous_points = track_state.get('keypoints') or []
-        previous_conf = track_state.get('keypoint_conf') or []
-        previous_depth = track_state.get('depth_by_index') or {}
-        previous_updated_at = float(track_state.get('updated_at', 0.0))
+        previous_points = track_state.get("keypoints") or []
+        previous_conf = track_state.get("keypoint_conf") or []
+        previous_depth = track_state.get("depth_by_index") or {}
+        previous_updated_at = float(track_state.get("updated_at", 0.0))
         time_delta = max(0.0, float(now) - previous_updated_at)
-        bbox = detection.get('bbox') or [0.0, 0.0, 1.0, 1.0]
+        bbox = detection.get("bbox") or [0.0, 0.0, 1.0, 1.0]
         bbox_side = max(1.0, self._bbox_max_side(bbox))
 
         fused_points = []
@@ -729,13 +735,9 @@ class PersonDetector:
             fused_x = float(point[0])
             fused_y = float(point[1])
             fused_confidence = float(confidence)
-            if (
-                previous_point_valid
-                and time_delta <= self.POSE_DEPTH_FUSION_TRACK_MAX_AGE_SECONDS
-            ):
+            if previous_point_valid and time_delta <= self.POSE_DEPTH_FUSION_TRACK_MAX_AGE_SECONDS:
                 displacement = (
-                    ((fused_x - float(previous_point[0])) ** 2)
-                    + ((fused_y - float(previous_point[1])) ** 2)
+                    ((fused_x - float(previous_point[0])) ** 2) + ((fused_y - float(previous_point[1])) ** 2)
                 ) ** 0.5
                 displacement_norm = displacement / bbox_side
 
@@ -764,8 +766,8 @@ class PersonDetector:
             elif previous_depth_value is not None:
                 fused_depth[index] = float(previous_depth_value)
 
-        detection['keypoints'] = fused_points
-        detection['keypoint_conf'] = fused_conf
+        detection["keypoints"] = fused_points
+        detection["keypoint_conf"] = fused_conf
         return fused_points, fused_conf, fused_depth
 
     def _cleanup_pose_fusion_tracks(self, now, active_track_ids=None, reset=False):
@@ -779,10 +781,7 @@ class PersonDetector:
         self._pose_fusion_tracks = {
             track_id: state
             for track_id, state in self._pose_fusion_tracks.items()
-            if (
-                track_id in active
-                or (float(now) - float(state.get('updated_at', 0.0))) <= max_age
-            )
+            if (track_id in active or (float(now) - float(state.get("updated_at", 0.0))) <= max_age)
         }
 
     def _apply_depth_pose_fusion(self, detections, depth_frame, now, source_mode):
@@ -811,11 +810,11 @@ class PersonDetector:
                 source_mode=source_mode,
             )
             self._pose_fusion_tracks[track_id] = {
-                'bbox': list(detection.get('bbox') or [0.0, 0.0, 1.0, 1.0]),
-                'keypoints': fused_points,
-                'keypoint_conf': fused_conf,
-                'depth_by_index': fused_depth,
-                'updated_at': float(now),
+                "bbox": list(detection.get("bbox") or [0.0, 0.0, 1.0, 1.0]),
+                "keypoints": fused_points,
+                "keypoint_conf": fused_conf,
+                "depth_by_index": fused_depth,
+                "updated_at": float(now),
             }
             active_track_ids.append(track_id)
 
@@ -828,18 +827,18 @@ class PersonDetector:
 
         prioritized = sorted(
             candidates,
-            key=lambda item: (item['confidence'], self._current_bbox_area(item['bbox'])),
+            key=lambda item: (item["confidence"], self._current_bbox_area(item["bbox"])),
             reverse=True,
         )
         kept = []
 
         for candidate in prioritized:
-            bbox = candidate['bbox']
+            bbox = candidate["bbox"]
             duplicate_found = False
             for kept_item in kept:
                 if self._boxes_likely_same_person(
                     bbox,
-                    kept_item['bbox'],
+                    kept_item["bbox"],
                     iou_threshold=self.DETECTION_DUPLICATE_IOU_THRESHOLD,
                     center_ratio=self.DETECTION_DUPLICATE_CENTER_RATIO,
                     area_ratio_limit=self.DETECTION_DUPLICATE_AREA_RATIO,
@@ -851,7 +850,7 @@ class PersonDetector:
             if not duplicate_found:
                 kept.append(candidate)
 
-        kept.sort(key=lambda item: (item['bbox'][0], item['bbox'][1]))
+        kept.sort(key=lambda item: (item["bbox"][0], item["bbox"][1]))
         return kept
 
     def _tracking_match_score(self, detection_bbox, entity_bbox):
@@ -881,10 +880,10 @@ class PersonDetector:
         return 1.0 - (distance / distance_limit) - size_penalty
 
     def _user_id_for_match(self, match):
-        return match.get('student_id') or match['label']
+        return match.get("student_id") or match["label"]
 
     def depth_source_mode(self):
-        return 'kinect'
+        return "kinect"
 
     def _depth_raw_value_to_cm(self, raw_value, source_mode):
         try:
@@ -894,14 +893,14 @@ class PersonDetector:
         if value <= 0:
             return None
 
-        if source_mode == 'kinect':
+        if source_mode == "kinect":
             if value < self.KINECT_RAW_MIN or value > self.KINECT_RAW_MAX:
                 return None
             denominator = (self.KINECT_RAW_COEFF_A * value) + self.KINECT_RAW_COEFF_B
             if denominator <= 0:
                 return None
             distance_cm = 100.0 / denominator
-        elif source_mode in {'kinect_v1_registered', 'kinect_v2'}:
+        elif source_mode in {"kinect_v1_registered", "kinect_v2"}:
             distance_cm = value / 10.0
         else:
             distance_cm = value / 10.0
@@ -915,8 +914,8 @@ class PersonDetector:
         if depth_frame is None or point is None:
             return None
 
-        height = int(getattr(depth_frame, 'shape', [0, 0])[0] or 0)
-        width = int(getattr(depth_frame, 'shape', [0, 0])[1] or 0)
+        height = int(getattr(depth_frame, "shape", [0, 0])[0] or 0)
+        width = int(getattr(depth_frame, "shape", [0, 0])[1] or 0)
         if width <= 0 or height <= 0:
             return None
 
@@ -931,7 +930,7 @@ class PersonDetector:
             return None
 
         patch = depth_frame[y1:y2, x1:x2]
-        if patch is None or getattr(patch, 'size', 0) == 0:
+        if patch is None or getattr(patch, "size", 0) == 0:
             return None
 
         values_cm = []
@@ -958,7 +957,7 @@ class PersonDetector:
         if (trim_count * 2) >= len(values_cm):
             trimmed = values_cm
         else:
-            trimmed = values_cm[trim_count:len(values_cm) - trim_count]
+            trimmed = values_cm[trim_count : len(values_cm) - trim_count]
 
         if not trimmed:
             return None
@@ -1017,9 +1016,7 @@ class PersonDetector:
     def _cleanup_distance_smoothing_locked(self, active_keys):
         active = {str(item) for item in (active_keys or []) if str(item).strip()}
         self._distance_smooth_cache = {
-            key: value
-            for key, value in self._distance_smooth_cache.items()
-            if key in active
+            key: value for key, value in self._distance_smooth_cache.items() if key in active
         }
 
     def _valid_point(self, keypoints, keypoint_conf, index):
@@ -1037,8 +1034,8 @@ class PersonDetector:
         if not pose_detection:
             return None
 
-        keypoints = pose_detection.get('keypoints') or []
-        keypoint_conf = pose_detection.get('keypoint_conf') or []
+        keypoints = pose_detection.get("keypoints") or []
+        keypoint_conf = pose_detection.get("keypoint_conf") or []
         if keypoint_index >= len(keypoints):
             return None
         if keypoint_conf and keypoint_index < len(keypoint_conf):
@@ -1074,7 +1071,7 @@ class PersonDetector:
             now=now,
             source_mode=depth_source_mode,
         )
-        boxes = [item['bbox'] for item in detections]
+        boxes = [item["bbox"] for item in detections]
 
         self._last_person_boxes = boxes
         self._last_pose_detections = detections
@@ -1093,7 +1090,7 @@ class PersonDetector:
             if used_indexes is not None and index in used_indexes:
                 continue
 
-            detection_bbox = detection.get('bbox')
+            detection_bbox = detection.get("bbox")
             if detection_bbox is None:
                 continue
 
@@ -1143,7 +1140,7 @@ class PersonDetector:
         base_x2 = min(width, int(bbox[2] + pad_x))
         base_y2 = min(height, int(bbox[3] + pad_y))
         if base_x2 <= base_x1 or base_y2 <= base_y1:
-            return {'status': 'no_face', 'message': 'Invalid person region for face analysis.'}
+            return {"status": "no_face", "message": "Invalid person region for face analysis."}
 
         upper_y1 = max(
             base_y1,
@@ -1159,7 +1156,7 @@ class PersonDetector:
             regions.append((base_x1, upper_y1, base_x2, upper_y2))
         regions.append((base_x1, base_y1, base_x2, base_y2))
 
-        last_failure = {'status': 'no_face', 'message': 'No face detected in selected person box.'}
+        last_failure = {"status": "no_face", "message": "No face detected in selected person box."}
         for x1, y1, x2, y2 in regions:
             crop = frame[y1:y2, x1:x2]
             if crop.size == 0:
@@ -1175,37 +1172,37 @@ class PersonDetector:
                 analyze_frame = cv2.resize(crop, (resized_w, resized_h), interpolation=cv2.INTER_AREA)
 
             analysis = self.face_db.analyze_faces(analyze_frame)
-            if analysis['status'] != 'ok' or not analysis['faces']:
-                last_failure = {'status': analysis['status'], 'message': analysis['message']}
+            if analysis["status"] != "ok" or not analysis["faces"]:
+                last_failure = {"status": analysis["status"], "message": analysis["message"]}
                 continue
 
-            best_face = max(analysis['faces'], key=lambda item: self._current_bbox_area(item['bbox']))
+            best_face = max(analysis["faces"], key=lambda item: self._current_bbox_area(item["bbox"]))
             scale_back = (1.0 / analysis_scale) if analysis_scale > 0 else 1.0
             face_bbox = [
-                (best_face['bbox'][0] * scale_back) + x1,
-                (best_face['bbox'][1] * scale_back) + y1,
-                (best_face['bbox'][2] * scale_back) + x1,
-                (best_face['bbox'][3] * scale_back) + y1,
+                (best_face["bbox"][0] * scale_back) + x1,
+                (best_face["bbox"][1] * scale_back) + y1,
+                (best_face["bbox"][2] * scale_back) + x1,
+                (best_face["bbox"][3] * scale_back) + y1,
             ]
             return {
-                'status': 'ok',
-                'message': 'Face detected inside the selected person box.',
-                'bbox': face_bbox,
-                'embedding': best_face['embedding'],
-                'det_score': float(best_face.get('det_score', 0.0)),
+                "status": "ok",
+                "message": "Face detected inside the selected person box.",
+                "bbox": face_bbox,
+                "embedding": best_face["embedding"],
+                "det_score": float(best_face.get("det_score", 0.0)),
             }
 
         return last_failure
 
     def crop_face_for_training(self, frame, person_bbox):
         analysis = self._analyze_face_inside_bbox_fast(frame, person_bbox)
-        if analysis.get('status') != 'ok' or not analysis.get('bbox'):
-            message = str(analysis.get('message') or '').strip() or 'No face detected in current frame.'
+        if analysis.get("status") != "ok" or not analysis.get("bbox"):
+            message = str(analysis.get("message") or "").strip() or "No face detected in current frame."
             raise RuntimeError(message)
 
-        face_bbox = [float(value) for value in analysis.get('bbox', [])]
+        face_bbox = [float(value) for value in analysis.get("bbox", [])]
         if len(face_bbox) != 4:
-            raise RuntimeError('Invalid face region in current frame.')
+            raise RuntimeError("Invalid face region in current frame.")
 
         height, width = frame.shape[:2]
         x1, y1, x2, y2 = face_bbox
@@ -1220,9 +1217,9 @@ class PersonDetector:
         crop_x2 = min(width, int(round(x2 + pad_x)))
         crop_y2 = min(height, int(round(y2 + pad_y_bottom)))
         if crop_x2 <= crop_x1 or crop_y2 <= crop_y1:
-            raise RuntimeError('Unable to crop face in current frame.')
+            raise RuntimeError("Unable to crop face in current frame.")
 
         cropped = frame[crop_y1:crop_y2, crop_x1:crop_x2]
         if cropped is None or cropped.size == 0:
-            raise RuntimeError('Unable to crop face in current frame.')
+            raise RuntimeError("Unable to crop face in current frame.")
         return cropped.copy()

@@ -9,29 +9,29 @@ from src.vision.rgb_depth_alignment import RgbDepthAligner
 
 
 class KinectService:
-    DISCONNECTED_MESSAGE = 'Please connect Kinect camera'
-    CONNECTING_MESSAGE = 'Connecting Kinect...'
-    CONNECTED_MESSAGE = 'Kinect connected'
-    MANUAL_DISCONNECT_MESSAGE = 'Kinect disconnected'
-    VIDEO_MODE_MESSAGE = 'Video test mode connected'
-    VIDEO_DISCONNECT_MESSAGE = 'Video test source disconnected'
+    DISCONNECTED_MESSAGE = "Please connect Kinect camera"
+    CONNECTING_MESSAGE = "Connecting Kinect..."
+    CONNECTED_MESSAGE = "Kinect connected"
+    MANUAL_DISCONNECT_MESSAGE = "Kinect disconnected"
+    VIDEO_MODE_MESSAGE = "Video test mode connected"
+    VIDEO_DISCONNECT_MESSAGE = "Video test source disconnected"
     VIDEO_CAPTURE_RETRY_SECONDS = 0.5
     KINECT_CAPTURE_RETRY_SECONDS = 0.08
-    KINECT_V2_WAIT_COLOR_MESSAGE = 'Kinect v2 is warming up (color)...'
-    KINECT_V2_WAIT_DEPTH_MESSAGE = 'Kinect v2 is warming up (depth)...'
-    KINECT_V2_FALLBACK_MESSAGE = 'Kinect v2 warmup timeout, trying Kinect v1...'
-    KINECT_BACKEND_AUTO = 'auto'
-    KINECT_BACKEND_V1 = 'kinect_v1'
-    KINECT_BACKEND_V2 = 'kinect_v2'
+    KINECT_V2_WAIT_COLOR_MESSAGE = "Kinect v2 is warming up (color)..."
+    KINECT_V2_WAIT_DEPTH_MESSAGE = "Kinect v2 is warming up (depth)..."
+    KINECT_V2_FALLBACK_MESSAGE = "Kinect v2 warmup timeout, trying Kinect v1..."
+    KINECT_BACKEND_AUTO = "auto"
+    KINECT_BACKEND_V1 = "kinect_v1"
+    KINECT_BACKEND_V2 = "kinect_v2"
     KINECT_V2_WARMUP_TIMEOUT_SECONDS = 3.0
     KINECT_V2_RETRY_COOLDOWN_SECONDS = 8.0
-    KINECT_IDLE_PREVIEW_FPS = _env_float('KINECT_IDLE_PREVIEW_FPS', 15.0)
-    KINECT_ATTENDANCE_FPS = _env_float('KINECT_ATTENDANCE_FPS', 12.0)
-    KINECT_COLOR_MAX_WIDTH = _env_int('KINECT_COLOR_MAX_WIDTH', 1280)
-    KINECT_V2_ALIGN_DEPTH_IN_ATTENDANCE = _env_bool('KINECT_V2_ALIGN_DEPTH_IN_ATTENDANCE', True)
-    KINECT_V2_DEPTH_ALIGN_INTERVAL = _env_float('KINECT_V2_DEPTH_ALIGN_INTERVAL', 0.85)
-    STREAM_PREVIEW_MAX_WIDTH = _env_int('KINECT_STREAM_PREVIEW_MAX_WIDTH', 1280)
-    STREAM_JPEG_QUALITY = _env_int('KINECT_STREAM_JPEG_QUALITY', 74)
+    KINECT_IDLE_PREVIEW_FPS = _env_float("KINECT_IDLE_PREVIEW_FPS", 15.0)
+    KINECT_ATTENDANCE_FPS = _env_float("KINECT_ATTENDANCE_FPS", 12.0)
+    KINECT_COLOR_MAX_WIDTH = _env_int("KINECT_COLOR_MAX_WIDTH", 1280)
+    KINECT_V2_ALIGN_DEPTH_IN_ATTENDANCE = _env_bool("KINECT_V2_ALIGN_DEPTH_IN_ATTENDANCE", True)
+    KINECT_V2_DEPTH_ALIGN_INTERVAL = _env_float("KINECT_V2_DEPTH_ALIGN_INTERVAL", 0.85)
+    STREAM_PREVIEW_MAX_WIDTH = _env_int("KINECT_STREAM_PREVIEW_MAX_WIDTH", 1280)
+    STREAM_JPEG_QUALITY = _env_int("KINECT_STREAM_JPEG_QUALITY", 74)
 
     def __init__(self, base_dir):
         self.base_dir = Path(base_dir)
@@ -54,20 +54,20 @@ class KinectService:
         self._video_source_path = self._resolve_video_source()
         self._video_capture = None
         self._video_capture_path = None
-        self._video_alias_path = self.base_dir / 'data' / 'test_videos' / '_aliases' / '_video_test_source.mp4'
+        self._video_alias_path = self.base_dir / "data" / "test_videos" / "_aliases" / "_video_test_source.mp4"
         self._video_fps = 30.0
-        self._video_loop_enabled = str(os.getenv('KINECT_VIDEO_LOOP', '1')).strip().lower() not in {'0', 'false', 'no'}
+        self._video_loop_enabled = str(os.getenv("KINECT_VIDEO_LOOP", "1")).strip().lower() not in {"0", "false", "no"}
         self._aligner = RgbDepthAligner(self.base_dir)
-        self._active_source_mode = 'video' if self._video_source_path is not None else 'kinect'
-        self._processing_mode = 'idle'
+        self._active_source_mode = "video" if self._video_source_path is not None else "kinect"
+        self._processing_mode = "idle"
         self._lock = threading.Lock()
         self._running = True
         self._desired_connected = True
-        self._status = 'connecting'
+        self._status = "connecting"
         if self._video_source_path is None:
             self._message = self.CONNECTING_MESSAGE
         else:
-            self._message = f'Connecting video source: {self._video_source_path.name}'
+            self._message = f"Connecting video source: {self._video_source_path.name}"
         self._color_frame = None
         self._depth_frame = None
         self._depth_raw_frame = None
@@ -79,8 +79,8 @@ class KinectService:
         self._thread.start()
 
     def _resolve_video_source(self):
-        for env_key in ('KINECT_TEST_VIDEO', 'KINECT_VIDEO_SOURCE'):
-            raw = os.getenv(env_key, '').strip()
+        for env_key in ("KINECT_TEST_VIDEO", "KINECT_VIDEO_SOURCE"):
+            raw = os.getenv(env_key, "").strip()
             if not raw:
                 continue
             path = Path(raw)
@@ -91,10 +91,10 @@ class KinectService:
         return None
 
     def _resolve_kinect_backend_preference(self):
-        raw = str(os.getenv('KINECT_BACKEND', self.KINECT_BACKEND_AUTO)).strip().lower()
-        if raw in {'v2', 'kinect2', 'kinect_v2', self.KINECT_BACKEND_V2}:
+        raw = str(os.getenv("KINECT_BACKEND", self.KINECT_BACKEND_AUTO)).strip().lower()
+        if raw in {"v2", "kinect2", "kinect_v2", self.KINECT_BACKEND_V2}:
             return self.KINECT_BACKEND_V2
-        if raw in {'v1', 'kinect1', 'kinect_v1', self.KINECT_BACKEND_V1}:
+        if raw in {"v1", "kinect1", "kinect_v1", self.KINECT_BACKEND_V1}:
             return self.KINECT_BACKEND_V1
         return self.KINECT_BACKEND_AUTO
 
@@ -111,9 +111,9 @@ class KinectService:
 
     def configure_kinect_dlls(self):
         dll_paths = [
-            self.base_dir / 'libfreenect' / 'build' / 'lib' / 'Release',
-            Path(r'C:\vcpkg\installed\x64-windows\bin'),
-            self.base_dir / '.venv' / 'Lib' / 'site-packages',
+            self.base_dir / "libfreenect" / "build" / "lib" / "Release",
+            Path(r"C:\vcpkg\installed\x64-windows\bin"),
+            self.base_dir / ".venv" / "Lib" / "site-packages",
         ]
 
         for dll_path in dll_paths:
@@ -138,7 +138,7 @@ class KinectService:
             self.configure_kinect_dlls()
             import cython0 as freenect  # pylint: disable=import-outside-toplevel
         except Exception as exc:  # pylint: disable=broad-except
-            self._freenect_error = f'Kinect v1 modules failed to load: {exc}'
+            self._freenect_error = f"Kinect v1 modules failed to load: {exc}"
             raise RuntimeError(self._freenect_error) from exc
 
         self._freenect_module = freenect
@@ -150,24 +150,24 @@ class KinectService:
             return self._kinect_v2_runtime
 
         try:
-            if not hasattr(time, 'clock'):
+            if not hasattr(time, "clock"):
                 time.clock = time.perf_counter
 
             import comtypes  # pylint: disable=import-outside-toplevel
 
-            if hasattr(comtypes, '_check_version'):
+            if hasattr(comtypes, "_check_version"):
                 comtypes._check_version = lambda *args, **kwargs: None
 
             from pykinect2 import PyKinectRuntime, PyKinectV2  # pylint: disable=import-outside-toplevel
         except Exception as exc:  # pylint: disable=broad-except
-            self._kinect_v2_error = f'Kinect v2 modules failed to load: {exc}'
+            self._kinect_v2_error = f"Kinect v2 modules failed to load: {exc}"
             raise RuntimeError(self._kinect_v2_error) from exc
 
         try:
             flags = PyKinectV2.FrameSourceTypes_Color | PyKinectV2.FrameSourceTypes_Depth
             runtime = PyKinectRuntime.PyKinectRuntime(flags)
         except Exception as exc:  # pylint: disable=broad-except
-            self._kinect_v2_error = f'Kinect v2 runtime failed to initialize: {exc}'
+            self._kinect_v2_error = f"Kinect v2 runtime failed to initialize: {exc}"
             raise RuntimeError(self._kinect_v2_error) from exc
 
         self._kinect_v2_runtime = runtime
@@ -178,7 +178,7 @@ class KinectService:
     def reset_freenect_module(self):
         if self._freenect_module is not None:
             try:
-                if hasattr(self._freenect_module, 'sync_stop'):
+                if hasattr(self._freenect_module, "sync_stop"):
                     self._freenect_module.sync_stop()
             except Exception:
                 pass
@@ -236,19 +236,19 @@ class KinectService:
                 self._kinect_backend = backend
                 return backend
             except Exception as exc:  # pylint: disable=broad-except
-                errors.append(f'{backend}: {exc}')
+                errors.append(f"{backend}: {exc}")
 
-        joined = ' | '.join(errors) if errors else 'no backend details'
-        raise RuntimeError(f'No supported Kinect backend available. {joined}')
+        joined = " | ".join(errors) if errors else "no backend details"
+        raise RuntimeError(f"No supported Kinect backend available. {joined}")
 
     def connect(self):
         with self._lock:
             self._desired_connected = True
-            self._status = 'connecting'
+            self._status = "connecting"
             if self._video_source_path is None:
                 self._message = self.CONNECTING_MESSAGE
             else:
-                self._message = f'Connecting video source: {self._video_source_path.name}'
+                self._message = f"Connecting video source: {self._video_source_path.name}"
 
         if self._video_source_path is None:
             self._reset_kinect_backends()
@@ -257,7 +257,7 @@ class KinectService:
     def disconnect(self, manual=True):
         with self._lock:
             self._desired_connected = not manual
-            self._status = 'disconnected'
+            self._status = "disconnected"
             if self._video_source_path is None:
                 self._message = self.MANUAL_DISCONNECT_MESSAGE if manual else self.DISCONNECTED_MESSAGE
             else:
@@ -278,17 +278,17 @@ class KinectService:
     def get_status(self):
         with self._lock:
             return {
-                'status': self._status,
-                'message': self._message,
-                'desired_connected': self._desired_connected,
-                'processing_mode': self._processing_mode,
-                'source_mode': self._active_source_mode,
-                'kinect_backend': self._kinect_backend or '',
-                'video_source': str(self._video_source_path) if self._video_source_path is not None else '',
+                "status": self._status,
+                "message": self._message,
+                "desired_connected": self._desired_connected,
+                "processing_mode": self._processing_mode,
+                "source_mode": self._active_source_mode,
+                "kinect_backend": self._kinect_backend or "",
+                "video_source": str(self._video_source_path) if self._video_source_path is not None else "",
             }
 
     def set_processing_mode(self, mode):
-        normalized_mode = 'attendance' if str(mode or '').strip().lower() == 'attendance' else 'idle'
+        normalized_mode = "attendance" if str(mode or "").strip().lower() == "attendance" else "idle"
         with self._lock:
             if self._processing_mode != normalized_mode:
                 self._kinect_v2_aligned_depth_frame = None
@@ -298,7 +298,7 @@ class KinectService:
 
     def _is_attendance_processing_mode(self):
         with self._lock:
-            return self._processing_mode == 'attendance'
+            return self._processing_mode == "attendance"
 
     def get_latest_color_frame(self):
         with self._lock:
@@ -314,44 +314,44 @@ class KinectService:
 
     def get_latest_jpeg(self, kind):
         with self._lock:
-            return self._color_jpeg if kind == 'color' else self._depth_jpeg
+            return self._color_jpeg if kind == "color" else self._depth_jpeg
 
     def get_latest_frame_marker(self):
         with self._lock:
             return {
-                'frame_seq': int(self._frame_seq),
-                'timestamp': float(self._frame_timestamp),
+                "frame_seq": int(self._frame_seq),
+                "timestamp": float(self._frame_timestamp),
             }
 
     def get_latest_frame_bundle(self):
         with self._lock:
             return {
-                'frame_seq': int(self._frame_seq),
-                'timestamp': float(self._frame_timestamp),
-                'color_frame': None if self._color_frame is None else self._color_frame.copy(),
-                'depth_visual_frame': None if self._depth_frame is None else self._depth_frame.copy(),
-                'depth_raw_frame': None if self._depth_raw_frame is None else self._depth_raw_frame.copy(),
-                'color_jpeg': self._color_jpeg,
-                'depth_jpeg': self._depth_jpeg,
+                "frame_seq": int(self._frame_seq),
+                "timestamp": float(self._frame_timestamp),
+                "color_frame": None if self._color_frame is None else self._color_frame.copy(),
+                "depth_visual_frame": None if self._depth_frame is None else self._depth_frame.copy(),
+                "depth_raw_frame": None if self._depth_raw_frame is None else self._depth_raw_frame.copy(),
+                "color_jpeg": self._color_jpeg,
+                "depth_jpeg": self._depth_jpeg,
             }
 
     def _should_reset(self, message):
         lowered = message.lower()
         return (
             self.DISCONNECTED_MESSAGE.lower() in lowered
-            or 'device disconnected' in lowered
-            or 'marked dead' in lowered
-            or 'control transfer failed' in lowered
-            or 'send_cmd' in lowered
-            or 'write_register' in lowered
-            or 'stopping streams' in lowered
-            or 'no supported kinect backend available' in lowered
-            or 'kinect v2 runtime failed' in lowered
-            or 'kinect v2 modules failed to load' in lowered
-            or 'kinect v1 modules failed to load' in lowered
-            or 'wrong version' in lowered
-            or 'dll load failed' in lowered
-            or 'comerror' in lowered
+            or "device disconnected" in lowered
+            or "marked dead" in lowered
+            or "control transfer failed" in lowered
+            or "send_cmd" in lowered
+            or "write_register" in lowered
+            or "stopping streams" in lowered
+            or "no supported kinect backend available" in lowered
+            or "kinect v2 runtime failed" in lowered
+            or "kinect v2 modules failed to load" in lowered
+            or "kinect v1 modules failed to load" in lowered
+            or "wrong version" in lowered
+            or "dll load failed" in lowered
+            or "comerror" in lowered
         )
 
     def _build_placeholder_frame(self, message):
@@ -371,14 +371,14 @@ class KinectService:
         cv2, _ = self.get_cv_modules()
         prepared_frame = frame
         max_width = max(0, int(self.STREAM_PREVIEW_MAX_WIDTH))
-        if max_width and frame is not None and getattr(frame, 'shape', None) is not None:
+        if max_width and frame is not None and getattr(frame, "shape", None) is not None:
             frame_width = int(frame.shape[1]) if len(frame.shape) >= 2 else 0
             if frame_width > max_width:
                 scale = max_width / float(frame_width)
                 target_height = max(1, int(round(frame.shape[0] * scale)))
                 prepared_frame = cv2.resize(frame, (max_width, target_height), interpolation=cv2.INTER_AREA)
         success, buffer = cv2.imencode(
-            '.jpg',
+            ".jpg",
             prepared_frame,
             [
                 int(cv2.IMWRITE_JPEG_QUALITY),
@@ -401,7 +401,7 @@ class KinectService:
             self._depth_jpeg = self._encode_frame(depth)
             self._frame_seq += 1
             self._frame_timestamp = placeholder_ts
-            self._active_source_mode = 'video' if self._video_source_path is not None else 'kinect'
+            self._active_source_mode = "video" if self._video_source_path is not None else "kinect"
 
     def _depth_visual_from_raw(self, depth_raw, clip_min, clip_max):
         cv2, np = self.get_cv_modules()
@@ -426,13 +426,13 @@ class KinectService:
         freenect = self.get_freenect_module()
         depth_raw = None
 
-        registered_format = getattr(freenect, 'DEPTH_REGISTERED', None)
+        registered_format = getattr(freenect, "DEPTH_REGISTERED", None)
         if registered_format is not None:
             try:
                 result = freenect.sync_get_depth(format=registered_format)
                 if result is not None:
                     depth_raw, _ = result
-                    self._active_source_mode = 'kinect_v1_registered'
+                    self._active_source_mode = "kinect_v1_registered"
             except Exception:
                 depth_raw = None
 
@@ -441,10 +441,10 @@ class KinectService:
             if result is None:
                 raise RuntimeError(self.DISCONNECTED_MESSAGE)
             depth_raw, _ = result
-            self._active_source_mode = 'kinect'
+            self._active_source_mode = "kinect"
 
         depth_raw = self._aligner.align_v1_depth(depth_raw.astype(np.uint16), (480, 640, 3))
-        clip_min, clip_max = (500, 4500) if self._active_source_mode == 'kinect_v1_registered' else (400, 2000)
+        clip_min, clip_max = (500, 4500) if self._active_source_mode == "kinect_v1_registered" else (400, 2000)
         depth_vis = self._depth_visual_from_raw(depth_raw, clip_min=clip_min, clip_max=clip_max)
         return depth_raw, depth_vis
 
@@ -454,7 +454,7 @@ class KinectService:
 
         if runtime.has_new_color_frame():
             color_flat = runtime.get_last_color_frame()
-            if color_flat is not None and getattr(color_flat, 'size', 0) > 0:
+            if color_flat is not None and getattr(color_flat, "size", 0) > 0:
                 width = int(runtime.color_frame_desc.Width)
                 height = int(runtime.color_frame_desc.Height)
                 color_bgra = color_flat.reshape((height, width, 4)).astype(np.uint8)
@@ -472,7 +472,7 @@ class KinectService:
 
         if runtime.has_new_depth_frame():
             depth_flat = runtime.get_last_depth_frame()
-            if depth_flat is not None and getattr(depth_flat, 'size', 0) > 0:
+            if depth_flat is not None and getattr(depth_flat, "size", 0) > 0:
                 width = int(runtime.depth_frame_desc.Width)
                 height = int(runtime.depth_frame_desc.Height)
                 self._kinect_v2_depth_frame = depth_flat.reshape((height, width)).astype(np.uint16)
@@ -487,12 +487,12 @@ class KinectService:
         if not self._is_attendance_processing_mode():
             depth_raw = self._kinect_v2_depth_frame.copy()
             depth_vis = self._depth_visual_from_raw(depth_raw, clip_min=500, clip_max=4500)
-            self._active_source_mode = 'kinect_v2_preview'
+            self._active_source_mode = "kinect_v2_preview"
             return depth_raw, depth_vis
 
         # Keep the preview on raw depth; aligned v2 depth is expensive and visually noisy.
         raw_depth_vis = self._depth_visual_from_raw(self._kinect_v2_depth_frame, clip_min=500, clip_max=4500)
-        self._active_source_mode = 'kinect_v2'
+        self._active_source_mode = "kinect_v2"
 
         if not self.KINECT_V2_ALIGN_DEPTH_IN_ATTENDANCE:
             self._kinect_v2_aligned_depth_frame = None
@@ -561,9 +561,9 @@ class KinectService:
 
     def _connected_message_for_active_backend(self):
         if self._kinect_backend == self.KINECT_BACKEND_V2:
-            return f'{self.CONNECTED_MESSAGE} (v2)'
+            return f"{self.CONNECTED_MESSAGE} (v2)"
         if self._kinect_backend == self.KINECT_BACKEND_V1:
-            return f'{self.CONNECTED_MESSAGE} (v1)'
+            return f"{self.CONNECTED_MESSAGE} (v1)"
         return self.CONNECTED_MESSAGE
 
     def _close_video_capture(self):
@@ -581,16 +581,15 @@ class KinectService:
             return None
 
         try:
-            str(self._video_source_path).encode('ascii')
+            str(self._video_source_path).encode("ascii")
             return self._video_source_path
         except UnicodeEncodeError:
             source_stat = self._video_source_path.stat()
             needs_copy = True
             if self._video_alias_path.exists():
                 alias_stat = self._video_alias_path.stat()
-                needs_copy = (
-                    alias_stat.st_size != source_stat.st_size
-                    or int(alias_stat.st_mtime) != int(source_stat.st_mtime)
+                needs_copy = alias_stat.st_size != source_stat.st_size or int(alias_stat.st_mtime) != int(
+                    source_stat.st_mtime
                 )
             if needs_copy:
                 self._video_alias_path.parent.mkdir(parents=True, exist_ok=True)
@@ -601,12 +600,12 @@ class KinectService:
         cv2, _ = self.get_cv_modules()
         capture_path = self._resolve_video_capture_path()
         if capture_path is None:
-            raise RuntimeError('Video source path is not configured.')
+            raise RuntimeError("Video source path is not configured.")
 
         capture = cv2.VideoCapture(str(capture_path))
         if not capture.isOpened():
             capture.release()
-            raise RuntimeError(f'Unable to open video source: {capture_path.name}')
+            raise RuntimeError(f"Unable to open video source: {capture_path.name}")
 
         fps = float(capture.get(cv2.CAP_PROP_FPS) or 0.0)
         if fps > 0:
@@ -622,11 +621,11 @@ class KinectService:
         ok, frame = self._video_capture.read()
         if not ok or frame is None:
             if not self._video_loop_enabled:
-                raise RuntimeError('Video source reached end-of-file.')
+                raise RuntimeError("Video source reached end-of-file.")
             self._video_capture.set(cv2.CAP_PROP_POS_FRAMES, 0)
             ok, frame = self._video_capture.read()
             if not ok or frame is None:
-                raise RuntimeError('Unable to read frame from video source.')
+                raise RuntimeError("Unable to read frame from video source.")
         return frame
 
     def _build_depth_from_color(self, frame):
@@ -634,9 +633,9 @@ class KinectService:
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         depth_norm = cv2.GaussianBlur(gray, (9, 9), 0)
         depth_norm = cv2.normalize(depth_norm, None, 0, 255, cv2.NORM_MINMAX)
-        depth_norm = depth_norm.astype('uint8')
+        depth_norm = depth_norm.astype("uint8")
         # Offline-video fallback: generate a pseudo raw depth map in millimeters.
-        depth_raw = (2000.0 - ((depth_norm.astype('float32') / 255.0) * 1400.0)).astype('uint16')
+        depth_raw = (2000.0 - ((depth_norm.astype("float32") / 255.0) * 1400.0)).astype("uint16")
         depth_vis = cv2.applyColorMap(255 - depth_norm, cv2.COLORMAP_TURBO)
         return depth_raw, depth_vis
 
@@ -656,7 +655,11 @@ class KinectService:
                 time.sleep(0.2)
                 continue
 
-            frame_interval = self._video_interval_seconds() if self._video_source_path is not None else self.KINECT_CAPTURE_RETRY_SECONDS
+            frame_interval = (
+                self._video_interval_seconds()
+                if self._video_source_path is not None
+                else self.KINECT_CAPTURE_RETRY_SECONDS
+            )
 
             try:
                 if self._video_source_path is None:
@@ -674,7 +677,7 @@ class KinectService:
                     color = self._capture_color_from_video()
                     depth_raw, depth = self._build_depth_from_color(color)
                     connected_message = self.VIDEO_MODE_MESSAGE
-                    self._active_source_mode = 'video'
+                    self._active_source_mode = "video"
 
                 color_jpeg = self._encode_frame(color)
                 depth_jpeg = self._encode_frame(depth)
@@ -688,7 +691,7 @@ class KinectService:
                     self._depth_jpeg = depth_jpeg
                     self._frame_seq += 1
                     self._frame_timestamp = capture_ts
-                    self._status = 'connected'
+                    self._status = "connected"
                     self._message = connected_message
             except Exception as exc:  # pylint: disable=broad-except
                 message = str(exc)
@@ -719,9 +722,13 @@ class KinectService:
                 }
                 self._update_placeholders(message)
                 with self._lock:
-                    self._status = 'connecting' if is_connecting_state else 'disconnected'
+                    self._status = "connecting" if is_connecting_state else "disconnected"
                     self._message = message
-                time.sleep(self.VIDEO_CAPTURE_RETRY_SECONDS if self._video_source_path is not None else self.KINECT_CAPTURE_RETRY_SECONDS)
+                time.sleep(
+                    self.VIDEO_CAPTURE_RETRY_SECONDS
+                    if self._video_source_path is not None
+                    else self.KINECT_CAPTURE_RETRY_SECONDS
+                )
                 continue
 
             time.sleep(frame_interval)
@@ -730,5 +737,5 @@ class KinectService:
         while True:
             payload = self.get_latest_jpeg(kind)
             if payload is not None:
-                yield b'--frame\r\nContent-Type: image/jpeg\r\n\r\n' + payload + b'\r\n'
+                yield b"--frame\r\nContent-Type: image/jpeg\r\n\r\n" + payload + b"\r\n"
             time.sleep(0.08)

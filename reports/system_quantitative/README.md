@@ -1,6 +1,6 @@
 # Copilot Kinect 系統量化報表
 
-產生日期：2026-06-10  
+產生日期：2026-06-10
 資料來源：`history/`、`clustering/`、`data/video_tuning/`、`data/embeddings/`、`tests/`
 
 ## 先講結論

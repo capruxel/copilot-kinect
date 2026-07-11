@@ -22,7 +22,7 @@ class AlignmentProfile:
 
 class RgbDepthAligner:
     DEFAULT_PROFILES = {
-        'kinect_v1': AlignmentProfile(
+        "kinect_v1": AlignmentProfile(
             enabled=True,
             shift_x=0.0,
             shift_y=0.0,
@@ -31,7 +31,7 @@ class RgbDepthAligner:
             hole_fill_kernel=0,
             prefer_native_mapper=False,
         ),
-        'kinect_v2': AlignmentProfile(
+        "kinect_v2": AlignmentProfile(
             enabled=True,
             shift_x=0.0,
             shift_y=0.0,
@@ -44,7 +44,7 @@ class RgbDepthAligner:
 
     def __init__(self, base_dir):
         self.base_dir = Path(base_dir)
-        self.profile_file = self.base_dir / 'data' / 'kinect_alignment_profiles.json'
+        self.profile_file = self.base_dir / "data" / "kinect_alignment_profiles.json"
         self._v2_color_space_buffer = None
         self._v2_color_space_view = None
         self._v2_color_space_count = 0
@@ -56,7 +56,7 @@ class RgbDepthAligner:
         if not self.profile_file.exists():
             return self.DEFAULT_PROFILES.copy()
         try:
-            with self.profile_file.open('r', encoding='utf-8') as f:
+            with self.profile_file.open("r", encoding="utf-8") as f:
                 payload = json.load(f)
         except Exception:
             return self.DEFAULT_PROFILES.copy()
@@ -65,11 +65,14 @@ class RgbDepthAligner:
         result = {}
         for key, default in self.DEFAULT_PROFILES.items():
             overrides = payload.get(key, {}) if isinstance(payload.get(key), dict) else {}
-            merged = {f: overrides.get(f, getattr(default, f)) for f in ('enabled', 'hole_fill_kernel', 'prefer_native_mapper')}
+            merged = {
+                f: overrides.get(f, getattr(default, f))
+                for f in ("enabled", "hole_fill_kernel", "prefer_native_mapper")
+            }
             result[key] = AlignmentProfile(
-                enabled=bool(merged.get('enabled', True)),
-                hole_fill_kernel=max(0, int(merged.get('hole_fill_kernel', 0) or 0)),
-                prefer_native_mapper=bool(merged.get('prefer_native_mapper', True)),
+                enabled=bool(merged.get("enabled", True)),
+                hole_fill_kernel=max(0, int(merged.get("hole_fill_kernel", 0) or 0)),
+                prefer_native_mapper=bool(merged.get("prefer_native_mapper", True)),
             )
         return result
 
@@ -136,7 +139,7 @@ class RgbDepthAligner:
         if depth_raw is None:
             return None
         height, width = color_shape[:2]
-        profile = self.get_profile('kinect_v1')
+        profile = self.get_profile("kinect_v1")
         return self._apply_profile(depth_raw, (width, height), profile, is_depth=True)
 
     def _ensure_v2_color_space_buffer(self, point_count, pykinect_v2_module):
@@ -157,7 +160,7 @@ class RgbDepthAligner:
         if runtime is None or depth_raw is None:
             return None
 
-        mapper = getattr(runtime, '_mapper', None)
+        mapper = getattr(runtime, "_mapper", None)
         if mapper is None:
             return None
 
@@ -166,8 +169,8 @@ class RgbDepthAligner:
         if point_count <= 0:
             return None
 
-        color_height = int(getattr(runtime.color_frame_desc, 'Height', 0) or 0)
-        color_width = int(getattr(runtime.color_frame_desc, 'Width', 0) or 0)
+        color_height = int(getattr(runtime.color_frame_desc, "Height", 0) or 0)
+        color_width = int(getattr(runtime.color_frame_desc, "Width", 0) or 0)
         if color_height <= 0 or color_width <= 0:
             return None
 
@@ -215,7 +218,7 @@ class RgbDepthAligner:
             return None
 
         height, width = color_shape[:2]
-        profile = self.get_profile('kinect_v2')
+        profile = self.get_profile("kinect_v2")
         aligned = None
         if profile.prefer_native_mapper:
             try:

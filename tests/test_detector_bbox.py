@@ -1,8 +1,8 @@
-from src.vision.detector import PersonDetector, _env_float, _env_bool, _env_int
+from src.vision.detector import PersonDetector, _env_bool, _env_float, _env_int
 
 
 def detector():
-    return PersonDetector('/tmp')
+    return PersonDetector("/tmp")
 
 
 class TestBboxMath:
@@ -36,38 +36,42 @@ class TestBboxMath:
 
     def test_boxes_likely_same_person_via_iou(self):
         assert self.d._boxes_likely_same_person(
-            [0, 0, 10, 10], [2, 2, 8, 8],
-            iou_threshold=0.1, center_ratio=0.5,
-            area_ratio_limit=2.0, overlap_ratio=0.3,
+            [0, 0, 10, 10],
+            [2, 2, 8, 8],
+            iou_threshold=0.1,
+            center_ratio=0.5,
+            area_ratio_limit=2.0,
+            overlap_ratio=0.3,
         )
 
     def test_boxes_not_same_person(self):
         assert not self.d._boxes_likely_same_person(
-            [0, 0, 10, 10], [50, 50, 60, 60],
-            iou_threshold=0.1, center_ratio=0.3,
-            area_ratio_limit=1.5, overlap_ratio=0.3,
+            [0, 0, 10, 10],
+            [50, 50, 60, 60],
+            iou_threshold=0.1,
+            center_ratio=0.3,
+            area_ratio_limit=1.5,
+            overlap_ratio=0.3,
         )
 
     def test_deduplicate_no_duplicates(self):
         candidates = [
-            {'bbox': [0, 0, 10, 10], 'confidence': 0.9},
-            {'bbox': [50, 50, 60, 60], 'confidence': 0.8},
+            {"bbox": [0, 0, 10, 10], "confidence": 0.9},
+            {"bbox": [50, 50, 60, 60], "confidence": 0.8},
         ]
         result = self.d._deduplicate_detection_boxes(candidates)
         assert len(result) == 2
 
     def test_deduplicate_removes_overlap(self):
         candidates = [
-            {'bbox': [0, 0, 20, 20], 'confidence': 0.9},
-            {'bbox': [2, 2, 18, 18], 'confidence': 0.8},
+            {"bbox": [0, 0, 20, 20], "confidence": 0.9},
+            {"bbox": [2, 2, 18, 18], "confidence": 0.8},
         ]
         result = self.d._deduplicate_detection_boxes(candidates)
         assert len(result) == 1
 
     def test_intersection_over_min_area(self):
-        overlap = self.d._bbox_intersection_over_min_area(
-            [0, 0, 10, 10], [5, 5, 15, 15]
-        )
+        overlap = self.d._bbox_intersection_over_min_area([0, 0, 10, 10], [5, 5, 15, 15])
         assert abs(overlap - 25.0 / 100.0) < 1e-9
 
 
@@ -85,8 +89,8 @@ class TestPoseMethods:
 
     def test_coerce_pose_arrays_pads_to_min_length(self):
         det = {
-            'keypoints': [[1.0, 2.0], [3.0, 4.0]],
-            'keypoint_conf': [0.5, 0.6],
+            "keypoints": [[1.0, 2.0], [3.0, 4.0]],
+            "keypoint_conf": [0.5, 0.6],
         }
         pts, conf = self.d._coerce_pose_arrays(det, min_length=17)
         assert len(pts) == 17
@@ -97,7 +101,7 @@ class TestPoseMethods:
         assert conf[2] == 0.0
 
     def test_coerce_pose_arrays_empty_arrays(self):
-        det = {'keypoints': [], 'keypoint_conf': []}
+        det = {"keypoints": [], "keypoint_conf": []}
         pts, conf = self.d._coerce_pose_arrays(det, min_length=17)
         assert len(pts) == 17
         assert len(conf) == 17
@@ -111,8 +115,8 @@ class TestPoseMethods:
 
     def test_coerce_pose_arrays_none_points_padded(self):
         det = {
-            'keypoints': [None, [1.0, 2.0]],
-            'keypoint_conf': [0.3, 0.4],
+            "keypoints": [None, [1.0, 2.0]],
+            "keypoint_conf": [0.3, 0.4],
         }
         pts, conf = self.d._coerce_pose_arrays(det, min_length=5)
         assert pts[0] == [0.0, 0.0]
@@ -139,88 +143,88 @@ class TestPoseMethods:
         assert result == 100.0
 
     def test_user_id_for_match_student_id_wins(self):
-        match = {'student_id': 'S123', 'label': 'John'}
-        assert self.d._user_id_for_match(match) == 'S123'
+        match = {"student_id": "S123", "label": "John"}
+        assert self.d._user_id_for_match(match) == "S123"
 
     def test_user_id_for_match_label_fallback(self):
-        match = {'label': 'John'}
-        assert self.d._user_id_for_match(match) == 'John'
+        match = {"label": "John"}
+        assert self.d._user_id_for_match(match) == "John"
 
     def test_user_id_for_match_empty_student_id(self):
-        match = {'student_id': '', 'label': 'Jane'}
-        assert self.d._user_id_for_match(match) == 'Jane'
+        match = {"student_id": "", "label": "Jane"}
+        assert self.d._user_id_for_match(match) == "Jane"
 
     def test_user_id_for_match_label_only(self):
-        assert self.d._user_id_for_match({'label': 'Alice'}) == 'Alice'
+        assert self.d._user_id_for_match({"label": "Alice"}) == "Alice"
 
 
 class TestEnvHelpers:
     def test_env_float_valid(self, monkeypatch):
-        monkeypatch.setenv('TEF_TEST', '3.14')
-        assert _env_float('TEF_TEST', 0.0) == 3.14
+        monkeypatch.setenv("TEF_TEST", "3.14")
+        assert _env_float("TEF_TEST", 0.0) == 3.14
 
     def test_env_float_empty(self, monkeypatch):
-        monkeypatch.setenv('TEF_TEST', '')
-        assert _env_float('TEF_TEST', 1.5) == 1.5
+        monkeypatch.setenv("TEF_TEST", "")
+        assert _env_float("TEF_TEST", 1.5) == 1.5
 
     def test_env_float_missing(self, monkeypatch):
-        monkeypatch.delenv('TEF_MISSING', raising=False)
-        assert _env_float('TEF_MISSING', 2.5) == 2.5
+        monkeypatch.delenv("TEF_MISSING", raising=False)
+        assert _env_float("TEF_MISSING", 2.5) == 2.5
 
     def test_env_float_invalid(self, monkeypatch):
-        monkeypatch.setenv('TEF_TEST', 'not_a_number')
-        assert _env_float('TEF_TEST', 0.0) == 0.0
+        monkeypatch.setenv("TEF_TEST", "not_a_number")
+        assert _env_float("TEF_TEST", 0.0) == 0.0
 
     def test_env_float_whitespace(self, monkeypatch):
-        monkeypatch.setenv('TEF_TEST', '  42.5  ')
-        assert _env_float('TEF_TEST', 0.0) == 42.5
+        monkeypatch.setenv("TEF_TEST", "  42.5  ")
+        assert _env_float("TEF_TEST", 0.0) == 42.5
 
     def test_env_float_negative(self, monkeypatch):
-        monkeypatch.setenv('TEF_TEST', '-8.25')
-        assert _env_float('TEF_TEST', 0.0) == -8.25
+        monkeypatch.setenv("TEF_TEST", "-8.25")
+        assert _env_float("TEF_TEST", 0.0) == -8.25
 
     def test_env_bool_true_variants(self, monkeypatch):
-        for val in ['1', 'true', 'yes', 'on', 'TRUE', 'Yes', 'ON']:
-            monkeypatch.setenv('TEB_TEST', val)
-            assert _env_bool('TEB_TEST', False) is True
+        for val in ["1", "true", "yes", "on", "TRUE", "Yes", "ON"]:
+            monkeypatch.setenv("TEB_TEST", val)
+            assert _env_bool("TEB_TEST", False) is True
 
     def test_env_bool_false_variants(self, monkeypatch):
-        for val in ['0', 'false', 'no', 'off', 'FALSE', 'No', 'OFF']:
-            monkeypatch.setenv('TEB_TEST', val)
-            assert _env_bool('TEB_TEST', True) is False
+        for val in ["0", "false", "no", "off", "FALSE", "No", "OFF"]:
+            monkeypatch.setenv("TEB_TEST", val)
+            assert _env_bool("TEB_TEST", True) is False
 
     def test_env_bool_empty(self, monkeypatch):
-        monkeypatch.setenv('TEB_TEST', '')
-        assert _env_bool('TEB_TEST', True) is True
+        monkeypatch.setenv("TEB_TEST", "")
+        assert _env_bool("TEB_TEST", True) is True
 
     def test_env_bool_missing(self, monkeypatch):
-        monkeypatch.delenv('TEB_MISSING', raising=False)
-        assert _env_bool('TEB_MISSING', True) is True
+        monkeypatch.delenv("TEB_MISSING", raising=False)
+        assert _env_bool("TEB_MISSING", True) is True
 
     def test_env_bool_invalid(self, monkeypatch):
-        monkeypatch.setenv('TEB_TEST', 'garbage')
-        assert _env_bool('TEB_TEST', False) is False
+        monkeypatch.setenv("TEB_TEST", "garbage")
+        assert _env_bool("TEB_TEST", False) is False
 
     def test_env_int_valid(self, monkeypatch):
-        monkeypatch.setenv('TEI_TEST', '42')
-        assert _env_int('TEI_TEST', 0) == 42
+        monkeypatch.setenv("TEI_TEST", "42")
+        assert _env_int("TEI_TEST", 0) == 42
 
     def test_env_int_empty(self, monkeypatch):
-        monkeypatch.setenv('TEI_TEST', '')
-        assert _env_int('TEI_TEST', 99) == 99
+        monkeypatch.setenv("TEI_TEST", "")
+        assert _env_int("TEI_TEST", 99) == 99
 
     def test_env_int_missing(self, monkeypatch):
-        monkeypatch.delenv('TEI_MISSING', raising=False)
-        assert _env_int('TEI_MISSING', 7) == 7
+        monkeypatch.delenv("TEI_MISSING", raising=False)
+        assert _env_int("TEI_MISSING", 7) == 7
 
     def test_env_int_invalid(self, monkeypatch):
-        monkeypatch.setenv('TEI_TEST', 'abc')
-        assert _env_int('TEI_TEST', 10) == 10
+        monkeypatch.setenv("TEI_TEST", "abc")
+        assert _env_int("TEI_TEST", 10) == 10
 
     def test_env_int_negative(self, monkeypatch):
-        monkeypatch.setenv('TEI_TEST', '-5')
-        assert _env_int('TEI_TEST', 0) == -5
+        monkeypatch.setenv("TEI_TEST", "-5")
+        assert _env_int("TEI_TEST", 0) == -5
 
     def test_env_int_whitespace(self, monkeypatch):
-        monkeypatch.setenv('TEI_TEST', '  100  ')
-        assert _env_int('TEI_TEST', 0) == 100
+        monkeypatch.setenv("TEI_TEST", "  100  ")
+        assert _env_int("TEI_TEST", 0) == 100

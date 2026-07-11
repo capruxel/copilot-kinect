@@ -1,6 +1,6 @@
 import os
 
-from src.config import load_config, get_config_summary
+from src.config import get_config_summary, load_config
 
 _MINIMAL_TOML = """
 [models]
@@ -55,7 +55,7 @@ def test_load_config_invalid_toml_is_noop(tmp_path):
 def test_load_config_empty_env_section_skips(monkeypatch, tmp_path):
     monkeypatch.delenv("YOLO_DEVICE", raising=False)
     cfg = tmp_path / "config.toml"
-    cfg.write_text("[env]\n[models]\ndevice = \"cpu\"")
+    cfg.write_text('[env]\n[models]\ndevice = "cpu"')
 
     load_config(str(cfg))
 
