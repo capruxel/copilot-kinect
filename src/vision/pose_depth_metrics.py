@@ -31,14 +31,14 @@ def _trim_metric_rows(rows, now, window_seconds):
 
 
 def _safe_mean(values):
-    # ponytail: statistics.mean raises on empty, this returns 0.0
+    # ponytail: callers treat missing data as zero.
     if not values:
         return 0.0
     return statistics.mean(values)
 
 
 def _safe_std(values):
-    # ponytail: statistics.stdev raises on <2 values, this returns 0.0
+    # ponytail: fewer than two samples have zero spread.
     if len(values) <= 1:
         return 0.0
     return statistics.pstdev(values)

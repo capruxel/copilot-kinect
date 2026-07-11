@@ -56,8 +56,7 @@ def configure_kinect_dlls(base_dir: Path) -> None:
 
 @contextmanager
 def suppress_stderr_fd():
-    # ponytail: contextlib.redirect_stderr(open(os.devnull,'w')) — but pykinect2
-    # writes to the raw fd, not sys.stderr, so dup2 is needed here.
+    # ponytail: pykinect2 writes to the raw fd, so redirect_stderr cannot replace dup2.
     try:
         stderr_fd = sys.stderr.fileno()
     except Exception:
@@ -103,7 +102,7 @@ def safe_destroy_windows() -> None:
 
 
 def clamp_text(text: str, limit: int) -> str:
-    # ponytail: textwrap.shorten would work but adds [...] not ...
+    # ponytail: preserve the existing literal "..." suffix.
     clean = ' '.join(str(text or '').split())
     if len(clean) <= limit:
         return clean
@@ -404,7 +403,7 @@ def show_preview_frame(preview_frame: np.ndarray) -> bool:
 
 
 def create_stream(base_dir: Path, backend_name: str):
-    # ponytail: inline env set, KINECT_BACKEND env var already controls the backend
+    # ponytail: one process runs one Kinect backend.
     backend_map = {'v1': 'kinect_v1', 'v2': 'kinect_v2'}
     if backend_name in backend_map:
         os.environ['KINECT_BACKEND'] = backend_map[backend_name]
