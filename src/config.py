@@ -1,11 +1,6 @@
 import os
+import tomllib
 from pathlib import Path
-
-try:
-    import tomllib
-except ModuleNotFoundError:
-    import tomli as tomllib
-
 
 SECTION_KEY_MAP = {
     ("models", "pose_model"): "YOLO_POSE_MODEL",
