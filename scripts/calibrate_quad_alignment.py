@@ -12,6 +12,7 @@ if str(WORKSPACE) not in sys.path:
     sys.path.insert(0, str(WORKSPACE))
 
 from src.vision.rgb_depth_alignment import RgbDepthAligner  # noqa: E402
+from scripts.tune_with_video import quad_backend_slices  # noqa: E402
 
 
 def resolve_video_paths(video_args):
@@ -25,15 +26,6 @@ def resolve_video_paths(video_args):
         return paths
 
     return sorted((WORKSPACE / 'reels' / 'recordings').glob('*v1_v2*.mp4'))
-
-
-def quad_backend_slices(backend_name):
-    normalized = str(backend_name or '').strip().lower()
-    if normalized == 'v1':
-        return (slice(0, 480), slice(0, 640)), (slice(0, 480), slice(640, 1280))
-    if normalized == 'v2':
-        return (slice(480, 960), slice(0, 640)), (slice(480, 960), slice(640, 1280))
-    raise ValueError(f'Unsupported backend: {backend_name}')
 
 
 def split_quad_backend_frame(frame, backend_name):

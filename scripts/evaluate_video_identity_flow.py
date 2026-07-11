@@ -298,24 +298,6 @@ class VideoGalleryFaceDB:
         return matches
 
 
-def try_confirm_temporaries(pipeline, max_attempts):
-    with pipeline._lock:
-        temp_ids = [
-            temp_id
-            for temp_id, person in pipeline._temporary_people.items()
-            if person.confirm_status != 'processing'
-        ]
-    success = 0
-    failed = 0
-    for temp_id in temp_ids[:max(0, int(max_attempts))]:
-        result = pipeline.confirm_temporary_person(temp_id)
-        if result.get('status') == 'confirmed':
-            success += 1
-        elif result.get('status') == 'error':
-            failed += 1
-    return success, failed
-
-
 def evaluate_pipeline_with_gallery(
     video_path,
     gallery,
@@ -396,7 +378,7 @@ def evaluate_pipeline_with_gallery(
             temp_counts.append(len(pipeline._temporary_people))
 
         if confirm_every_seconds > 0 and simulated_now - last_confirm_at >= confirm_every_seconds:
-            success, failed = try_confirm_temporaries(pipeline, max_confirm_attempts)
+            success, failed = tuning.try_confirm_all_temporaries(pipeline, max_confirm_attempts)
             confirm_success += success
             confirm_failed += failed
             last_confirm_at = simulated_now

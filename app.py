@@ -1,6 +1,7 @@
 ﻿import json
 import logging
 import os
+import random
 import threading
 from pathlib import Path
 
@@ -283,15 +284,12 @@ class MinuteStudentCsvExporter:
         return rows_by_key
 
     def _stable_seed(self, value):
-        seed = 2166136261
-        for char in str(value or ''):
-            seed ^= ord(char)
-            seed = (seed * 16777619) & 0xFFFFFFFF
-        return seed
+        # ponytail: custom FNV hash replaced with built-in hash
+        return hash(str(value or ''))
 
     def _pseudo_random(self, seed, index=0):
-        raw_value = math.sin((float(seed) + 1.0) * 12.9898 + (float(index) + 1.0) * 78.233) * 43758.5453
-        return raw_value - math.floor(raw_value)
+        # ponytail: sin PRNG replaced with random.Random
+        return random.Random(int(seed) + int(index)).random()
 
     def _recent_week_labels(self, now, count):
         current = datetime.fromtimestamp(float(now))
