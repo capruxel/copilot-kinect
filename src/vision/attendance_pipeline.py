@@ -6,6 +6,7 @@ from pathlib import Path
 
 from src.vision.detector import PersonDetector, _env_bool, _env_float, _env_int
 from src.vision.pose_depth_metrics import PoseDepthMetricEngine
+from src.vision.region_focus import RegionFocusEngine
 
 
 @dataclass
@@ -90,6 +91,13 @@ class RecognitionPipeline:
         self._wake_event = threading.Event()
         self._font_cache = {}
         self._metric_engine = PoseDepthMetricEngine()
+        self._region_engine = RegionFocusEngine(
+            num_regions=_env_int("LED_STRIP_NUM_REGIONS", 5),
+            red_threshold=_env_float("LED_STRIP_RED_THRESHOLD", 30.0),
+            green_threshold=_env_float("LED_STRIP_GREEN_THRESHOLD", 60.0),
+        )
+        self._region_window_seconds = _env_float("LED_STRIP_WINDOW_SECONDS", 10.0)
+        self._region_state = self._region_engine.get_region_state()
         self._running = True
         self._attendance_mode = False
         self._annotated_jpeg = None
@@ -564,6 +572,10 @@ class RecognitionPipeline:
                 "announcement": announcement,
                 "current_course": dict(self._current_course),
             }
+
+    def get_region_focus(self):
+        with self._lock:
+            return list(self._region_state)
 
     def confirm_temporary_person(self, temp_id):
         with self._lock:
@@ -1799,6 +1811,26 @@ class RecognitionPipeline:
                 "announcement": self._announcements[-1]["message"] if self._announcements else "課堂模式已啟動。",
             }
         )
+        self._update_region_focus_locked(now)
+
+    def _update_region_focus_locked(self, now):
+        students_data = []
+        for person in self._confirmed_people.values():
+            if person.current_status != "present" or person.bbox is None:
+                continue
+            state = self._metric_engine._students.get(person.user_id)
+            if state is None:
+                continue
+            rows = [
+                row
+                for row in state.metric_rows.get("focus-ratio", [])
+                if float(row.get("t", 0.0)) >= now - self._region_window_seconds
+            ]
+            if not rows:
+                continue
+            position = (person.bbox[1] + person.bbox[3]) / 2.0
+            students_data.extend({"position": position, "focus_score": row["value"]} for row in rows)
+        self._region_state = self._region_engine.update(students_data, now)
 
     def _process_frame(self, frame, depth_frame=None, depth_visual_frame=None, frame_timestamp=None):
         now = float(frame_timestamp) if frame_timestamp is not None else time.time()
