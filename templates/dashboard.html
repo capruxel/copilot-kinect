@@ -451,7 +451,30 @@
         </button>
     </div>
     <script>
-    {% include '_dashboard_scripts.html' %}
+        window.__DATA__ = {
+            managerCourses: {{ (manager_courses if manager_courses else []) | tojson }},
+            defaultCourseId: {{ (default_course_id if default_course_id else '') | tojson }},
+            defaultCourseName: {{ (default_course_name if default_course_name else '') | tojson }},
+            userAccount: {{ user["帳號"] | tojson }},
+            trainingStudents: {{ (training_data.students if training_data else []) | tojson }},
+        };
+        window.__URLS__ = {
+            mockMetrics: "{{ url_for('static', filename='mock_metrics/') }}",
+            updateAttendanceCourse: "{{ url_for('update_attendance_course') }}",
+            kinectColorFeed: "{{ url_for('kinect_color_feed') }}",
+            kinectDepthFeed: "{{ url_for('kinect_depth_feed') }}",
+            trainingCaptureReset: "{{ url_for('training_capture_reset') }}",
+            attendanceStatus: "{{ url_for('attendance_status') }}",
+            confirmAttendancePerson: "{{ url_for('confirm_attendance_person') }}",
+            trainingCaptureFrame: "{{ url_for('training_capture_frame') }}",
+            trainingCapture: "{{ url_for('training_capture') }}",
+            disconnectKinect: "{{ url_for('disconnect_kinect') }}",
+            connectKinect: "{{ url_for('connect_kinect') }}",
+            stopAttendance: "{{ url_for('stop_attendance') }}",
+            startAttendance: "{{ url_for('start_attendance') }}",
+            kinectStatus: "{{ url_for('kinect_status') }}",
+        };
     </script>
+    <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
 </body>
 </html>

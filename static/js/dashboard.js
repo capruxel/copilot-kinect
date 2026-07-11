@@ -32,7 +32,7 @@
         const studentSummaryDuration = document.getElementById('student-summary-duration');
         const studentDetailPresenceChart = document.getElementById('student-detail-presence-chart');
         const studentMetricCharts = document.querySelectorAll('.mock-metric-chart');
-        const MOCK_METRIC_CSV_BASE = '{{ url_for("static", filename="mock_metrics/") }}';
+        const MOCK_METRIC_CSV_BASE = window.__URLS__.mockMetrics;
         const mockMetricCache = new Map();
         const liveMetricState = new Map();
         const METRIC_HISTORY_SECONDS = 300;
@@ -79,7 +79,7 @@
         const teacherChatInput = document.getElementById('teacher-chat-input');
         const teacherChatSend = document.getElementById('teacher-chat-send');
         const themeToggleButton = document.getElementById('theme-toggle-button');
-        const rawManagerCourses = {{ (manager_courses if manager_courses else []) | tojson }};
+        const rawManagerCourses = window.__DATA__.managerCourses;
         const managerCourseItems = Array.isArray(rawManagerCourses)
             ? rawManagerCourses
             : (rawManagerCourses && typeof rawManagerCourses === 'object' ? Object.values(rawManagerCourses) : []);
@@ -95,15 +95,15 @@
                 }))
                 .filter((item) => item.id && item.name)
             : [];
-        const defaultCourseId = {{ (default_course_id if default_course_id else '') | tojson }};
-        const defaultCourseName = {{ (default_course_name if default_course_name else '') | tojson }};
+        const defaultCourseId = window.__DATA__.defaultCourseId;
+        const defaultCourseName = window.__DATA__.defaultCourseName;
         if (!managerCourses.length && (defaultCourseId || defaultCourseName)) {
             managerCourses.push({
                 id: String(defaultCourseId || defaultCourseName || '').trim(),
                 name: String(defaultCourseName || defaultCourseId || '').trim(),
             });
         }
-        const currentUserAccount = {{ user["帳號"] | tojson }};
+        const currentUserAccount = window.__DATA__.userAccount;
         let lastKinectStatus = null;
         let attendanceMode = false;
         let trainingRegistry = new Map();
@@ -118,7 +118,7 @@
         let selectedCourseId = '';
         let selectedCourseName = '';
         let lastSyncedCourseKey = '';
-        const initialTrainingStudents = {{ (training_data.students if training_data else []) | tojson }};
+        const initialTrainingStudents = window.__DATA__.trainingStudents;
         const PROFILE_MENU_CLOSE_DELAY_MS = 220;
         const COURSE_STORAGE_KEY = `attendance_course_${currentUserAccount || 'default'}`;
         const THEME_STORAGE_KEY = 'dashboard_theme_preference';
@@ -182,7 +182,7 @@
             }
 
             try {
-                const response = await fetch('{{ url_for("update_attendance_course") }}', {
+                const response = await fetch(window.__URLS__.updateAttendanceCourse, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -1528,8 +1528,8 @@
 
         function refreshStreams() {
             const stamp = Date.now();
-            colorImage.src = '{{ url_for("kinect_color_feed") }}?t=' + stamp;
-            depthImage.src = '{{ url_for("kinect_depth_feed") }}?t=' + stamp;
+            colorImage.src = window.__URLS__.kinectColorFeed + '?t=' + stamp;
+            depthImage.src = window.__URLS__.kinectDepthFeed + '?t=' + stamp;
         }
 
         function animateCapturedSlot(slot) {
@@ -1575,7 +1575,7 @@
             }
 
             try {
-                await fetch('{{ url_for("training_capture_reset") }}', {
+                await fetch(window.__URLS__.trainingCaptureReset, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -2041,7 +2041,7 @@
                 } else {
                     query.set('include_metrics', '0');
                 }
-                const response = await fetch(`{{ url_for("attendance_status") }}?${query.toString()}`);
+                const response = await fetch(window.__URLS__.attendanceStatus + "?${query.toString()}`);
                 const payload = await response.json();
                 applyAttendancePayload(payload);
             } catch (error) {
@@ -2061,7 +2061,7 @@
             button.textContent = '辨識中...';
 
             try {
-                const response = await fetch('{{ url_for("confirm_attendance_person") }}', {
+                const response = await fetch(window.__URLS__.confirmAttendancePerson, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -2091,7 +2091,7 @@
             enrollDepartment.value = '';
             updateCaptureProgress(0);
             enrollStatus.textContent = '先確認左側即時畫面，再手動拍滿 3 張照片。';
-            enrollPreviewImage.src = '{{ url_for("kinect_color_feed") }}?modal=' + Date.now();
+            enrollPreviewImage.src = window.__URLS__.kinectColorFeed + '?modal=' + Date.now();
             enrollModal.hidden = false;
             resetEnrollCaptureBuffer(tempId);
             setTimeout(() => {
@@ -2120,7 +2120,7 @@
             setCapturePending(true);
 
             try {
-                const response = await fetch('{{ url_for("training_capture_frame") }}', {
+                const response = await fetch(window.__URLS__.trainingCaptureFrame, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -2168,7 +2168,7 @@
             enrollSubmitButton.textContent = '建立資料中...';
 
             try {
-                const response = await fetch('{{ url_for("training_capture") }}', {
+                const response = await fetch(window.__URLS__.trainingCapture, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -2217,7 +2217,7 @@
 
             try {
                 await fetch(
-                    isConnected ? '{{ url_for("disconnect_kinect") }}' : '{{ url_for("connect_kinect") }}',
+                    isConnected ? window.__URLS__.disconnectKinect : window.__URLS__.connectKinect,
                     { method: 'POST' },
                 );
                 refreshStreams();
@@ -2282,9 +2282,9 @@
             try {
                 let response;
                 if (previousAttendanceMode) {
-                    response = await fetch('{{ url_for("stop_attendance") }}', { method: 'POST' });
+                    response = await fetch(window.__URLS__.stopAttendance, { method: 'POST' });
                 } else {
-                    response = await fetch('{{ url_for("start_attendance") }}', {
+                    response = await fetch(window.__URLS__.startAttendance, {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
@@ -2324,7 +2324,7 @@
 
         async function fetchKinectStatus() {
             try {
-                const response = await fetch('{{ url_for("kinect_status") }}');
+                const response = await fetch(window.__URLS__.kinectStatus);
                 const payload = await response.json();
 
                 if (lastKinectStatus !== payload.status) {
