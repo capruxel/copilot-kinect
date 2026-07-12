@@ -1112,20 +1112,6 @@ class PersonDetector:
 
         return best_index, best_detection
 
-    def _crop_frame_for_training(self, frame, bbox):
-        height, width = frame.shape[:2]
-        x1, y1, x2, y2 = [int(value) for value in bbox]
-        pad_x = max(16, int((x2 - x1) * 0.12))
-        pad_y = max(16, int((y2 - y1) * 0.12))
-        x1 = max(0, x1 - pad_x)
-        y1 = max(0, y1 - pad_y)
-        x2 = min(width, x2 + pad_x)
-        y2 = min(height, y2 + pad_y)
-        cropped = frame[y1:y2, x1:x2]
-        if cropped.size == 0:
-            return frame.copy()
-        return cropped.copy()
-
     def _analyze_face_inside_bbox_fast(self, frame, bbox):
         cv2, _ = self._get_cv_modules()
         height, width = frame.shape[:2]

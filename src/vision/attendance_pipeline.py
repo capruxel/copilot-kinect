@@ -137,7 +137,6 @@ class RecognitionPipeline:
             "detector_model": "idle",
             "announcement": "尚未開始課堂。",
         }
-        self._detector.apply_runtime_tuning_profile()
         self._thread = threading.Thread(target=self._loop, daemon=True)
         self._thread.start()
         self._warmup_thread = None
@@ -521,18 +520,6 @@ class RecognitionPipeline:
     def get_current_course(self):
         with self._lock:
             return dict(self._current_course)
-
-    def get_latest_color_jpeg(self):
-        with self._frame_lock:
-            if not self._attendance_mode and self._annotated_jpeg is None:
-                return self.kinect_service.get_latest_jpeg("color")
-            return self._annotated_jpeg or self.kinect_service.get_latest_jpeg("color")
-
-    def get_latest_depth_jpeg(self):
-        with self._frame_lock:
-            if not self._attendance_mode and self._annotated_depth_jpeg is None:
-                return self.kinect_service.get_latest_jpeg("depth")
-            return self._annotated_depth_jpeg or self.kinect_service.get_latest_jpeg("depth")
 
     def get_status(self, include_metrics=True, metrics_user_id=None):
         with self._lock:

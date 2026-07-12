@@ -66,12 +66,6 @@ class FaceRecognitionDB:
 
         return providers
 
-    def get_analysis_runtime_info(self):
-        return {
-            "providers": list(self._app_providers),
-            "ready": self._app is not None,
-        }
-
     def get_photo_root(self):
         self.photo_root.mkdir(parents=True, exist_ok=True)
         return self.photo_root
