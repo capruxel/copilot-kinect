@@ -430,13 +430,6 @@
             }, PROFILE_MENU_CLOSE_DELAY_MS);
         }
 
-        function formatDuration(seconds) {
-            const totalSeconds = Math.max(0, Math.round(Number(seconds || 0)));
-            const minutes = Math.floor(totalSeconds / 60);
-            const remainder = totalSeconds % 60;
-            return `${minutes}m ${String(remainder).padStart(2, '0')}s`;
-        }
-
         function hashSeed(value) {
             const text = String(value || 'student');
             let hash = 0;
@@ -675,20 +668,6 @@
             return buildNumericHistoryRows(key, seedRows, studentKey);
         }
 
-        function buildMetricBuckets(rows, bucketCount = METRIC_BUCKET_COUNT) {
-            const safeRows = Array.isArray(rows) ? rows : [];
-            const buckets = [];
-            for (let index = 0; index < bucketCount; index += 1) {
-                const start = Math.floor((index * safeRows.length) / bucketCount);
-                const end = Math.floor(((index + 1) * safeRows.length) / bucketCount);
-                const segment = safeRows.slice(start, end);
-                if (segment.length) {
-                    buckets.push(segment);
-                }
-            }
-            return buckets;
-        }
-
         function buildDisplayMetricRows(key, rows, type) {
             const safeRows = Array.isArray(rows) ? rows : [];
             if (!safeRows.length) {
@@ -851,18 +830,10 @@
             return Array.from(indexes).sort((left, right) => left - right);
         }
 
-        function shouldHideMetricLabels(key) {
-            return false;
-        }
-
         function formatMetricLabel(key, label) {
             const safeLabel = String(label || '').trim();
             if (!safeLabel) {
                 return '--';
-            }
-
-            if (shouldHideMetricLabels(key)) {
-                return '';
             }
 
             if (key === 'shared-attention') {
@@ -1009,8 +980,6 @@
             const summaryText = key === 'attendance-rate'
                 ? `出席 ${presentDays} / ${values.length} 天`
                 : (key === 'assignment-score'
-                    ? `最高 ${formatMetricValue(key, values[maxIndex])}`
-                : (shouldHideMetricLabels(key)
                     ? `最高 ${formatMetricValue(key, values[maxIndex])}`
                     : `最高 ${formatMetricLabel(key, labels[maxIndex])} ${formatMetricValue(key, values[maxIndex])}`));
             const sublineLeft = key === 'attendance-rate'
