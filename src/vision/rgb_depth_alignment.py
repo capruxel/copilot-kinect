@@ -1,6 +1,6 @@
 import ctypes
 import json
-from dataclasses import asdict, dataclass
+from dataclasses import dataclass
 from pathlib import Path
 
 import cv2
@@ -10,12 +10,6 @@ import numpy as np
 @dataclass(frozen=True)
 class AlignmentProfile:
     enabled: bool = True
-    shift_x: float = 0.0
-    shift_y: float = 0.0
-    scale_x: float = 1.0
-    scale_y: float = 1.0
-    mirror_x: bool = False
-    mirror_y: bool = False
     hole_fill_kernel: int = 0
     prefer_native_mapper: bool = True
 
@@ -24,19 +18,11 @@ class RgbDepthAligner:
     DEFAULT_PROFILES = {
         "kinect_v1": AlignmentProfile(
             enabled=True,
-            shift_x=0.0,
-            shift_y=0.0,
-            scale_x=1.0,
-            scale_y=1.0,
             hole_fill_kernel=0,
             prefer_native_mapper=False,
         ),
         "kinect_v2": AlignmentProfile(
             enabled=True,
-            shift_x=0.0,
-            shift_y=0.0,
-            scale_x=1.0,
-            scale_y=1.0,
             hole_fill_kernel=5,
             prefer_native_mapper=True,
         ),
@@ -48,9 +34,6 @@ class RgbDepthAligner:
         self._v2_color_space_buffer = None
         self._v2_color_space_view = None
         self._v2_color_space_count = 0
-
-    def default_payload(self):
-        return {key: asdict(profile) for key, profile in self.DEFAULT_PROFILES.items()}
 
     def _read_profiles(self):
         if not self.profile_file.exists():
@@ -95,35 +78,6 @@ class RgbDepthAligner:
 
         if not profile.enabled:
             return aligned
-
-        if profile.mirror_x:
-            aligned = cv2.flip(aligned, 1)
-        if profile.mirror_y:
-            aligned = cv2.flip(aligned, 0)
-
-        matrix = np.array(
-            [
-                [
-                    float(profile.scale_x),
-                    0.0,
-                    ((1.0 - float(profile.scale_x)) * (target_width - 1) * 0.5) + float(profile.shift_x),
-                ],
-                [
-                    0.0,
-                    float(profile.scale_y),
-                    ((1.0 - float(profile.scale_y)) * (target_height - 1) * 0.5) + float(profile.shift_y),
-                ],
-            ],
-            dtype=np.float32,
-        )
-        aligned = cv2.warpAffine(
-            aligned,
-            matrix,
-            (target_width, target_height),
-            flags=interpolation,
-            borderMode=cv2.BORDER_CONSTANT,
-            borderValue=0,
-        )
 
         if is_depth and int(profile.hole_fill_kernel) >= 2:
             kernel_size = int(profile.hole_fill_kernel)

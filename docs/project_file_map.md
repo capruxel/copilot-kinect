@@ -91,7 +91,6 @@ Local/generated data, normally ignored:
 | --- | --- |
 | `scripts/rebuild_face_db.py` | Rebuild face embeddings |
 | `scripts/check_gpu_runtime.py` | Check GPU / ONNX Runtime providers |
-| `scripts/calibrate_quad_alignment.py` | RGB/depth calibration helper |
 | `scripts/eval_rgb_depth_keypoint_fusion.py` | RGB/depth/keypoint fusion evaluation |
 | `scripts/evaluate_video_identity_flow.py` | Video identity-flow evaluation |
 | `scripts/compare_recognition_snapshots.py` | Compare recognition snapshots |

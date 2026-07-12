@@ -166,12 +166,6 @@ data/kinect_alignment_profiles.json
 ```json
 {
   "enabled": true,
-  "shift_x": 0.0,
-  "shift_y": 0.0,
-  "scale_x": 1.0,
-  "scale_y": 1.0,
-  "mirror_x": false,
-  "mirror_y": false,
   "hole_fill_kernel": 5,
   "prefer_native_mapper": true
 }
@@ -182,7 +176,6 @@ data/kinect_alignment_profiles.json
 如果要用錄影做離線校正，可參考：
 
 ```powershell
-.\.venv\Scripts\python.exe scripts\calibrate_quad_alignment.py --write
 ```
 
 ## 九、快速驗證 PyKinect2

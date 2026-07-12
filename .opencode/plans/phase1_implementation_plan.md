@@ -488,7 +488,6 @@ grep -r "from src.vision.recognition_pipeline" --include="*.py"
 | `scripts/eval_rgb_depth_keypoint_fusion.py` | 715 | 一次性評估腳本 |
 | `scripts/evaluate_video_identity_flow.py` | 534 | 一次性評估腳本 |
 | `scripts/tune_face_threshold_with_videos.py` | 321 | 一次性調參腳本 |
-| `scripts/calibrate_quad_alignment.py` | 261 | 一次性校正腳本 |
 | `scripts/tune_quad_recordings.py` | 223 | 一次性調參腳本 |
 | `scripts/compare_recognition_snapshots.py` | 178 | 一次性比較腳本 |
 | `scripts/test_kinect.py` | 69 | 一次性硬體測試 |
