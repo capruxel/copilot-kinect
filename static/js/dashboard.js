@@ -981,7 +981,7 @@
                 ? `出席 ${presentDays} / ${values.length} 天`
                 : (key === 'assignment-score'
                     ? `最高 ${formatMetricValue(key, values[maxIndex])}`
-                    : `最高 ${formatMetricLabel(key, labels[maxIndex])} ${formatMetricValue(key, values[maxIndex])}`));
+                    : `最高 ${formatMetricLabel(key, labels[maxIndex])} ${formatMetricValue(key, values[maxIndex])}`);
             const sublineLeft = key === 'attendance-rate'
                 ? `整體出席率 ${formatMetricNumber(attendanceRate)}%`
                 : `平均 ${formatMetricValue(key, average)}`;
@@ -2010,7 +2010,7 @@
                 } else {
                     query.set('include_metrics', '0');
                 }
-                const response = await fetch(window.__URLS__.attendanceStatus + "?${query.toString()}`);
+                const response = await fetch(`${window.__URLS__.attendanceStatus}?${query.toString()}`);
                 const payload = await response.json();
                 applyAttendancePayload(payload);
             } catch (error) {
