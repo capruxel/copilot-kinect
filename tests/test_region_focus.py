@@ -111,8 +111,9 @@ class TestRegionFocusEngine:
         assert cached == result
 
     def test_no_students(self):
-        engine = RegionFocusEngine(num_regions=5)
+        engine = RegionFocusEngine()
         result = engine.update([], now=1000.0)
+        assert len(result) == 3
         all_off = all(r["color"] == "off" for r in result)
         assert all_off
 

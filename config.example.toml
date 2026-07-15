@@ -41,7 +41,7 @@ power_automate_url = ""
 [led_strip]
 driver = "mock"                          # mock 或 tcp
 host_port = 8765                         # TCP 伺服器 port
-num_regions = 5                          # 教室排數（區域數）
+num_regions = 3                          # 前、中、後三個區域
 red_threshold = 30.0                     # 專注度 ≤ 此值 → 紅燈
 green_threshold = 60.0                   # 專注度 ≥ 此值 → 綠燈
 window_seconds = 10.0                    # 中位數計算時間窗口（秒）

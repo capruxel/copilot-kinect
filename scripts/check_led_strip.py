@@ -12,11 +12,12 @@ from pathlib import Path
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(PROJECT_ROOT))
 
-from src.vision.region_focus import RegionFocusEngine
-from src.led.led_strip_driver import MockLedDriver
+from src.led.led_strip_driver import MockLedDriver  # noqa: E402
+from src.vision.region_focus import RegionFocusEngine  # noqa: E402
+
 
 def main():
-    engine = RegionFocusEngine(num_regions=5, red_threshold=30.0, green_threshold=60.0)
+    engine = RegionFocusEngine(num_regions=3, red_threshold=30.0, green_threshold=60.0)
     driver = MockLedDriver(log_path=PROJECT_ROOT / "data" / "led_strip_log.jsonl")
 
     now = time.time()
