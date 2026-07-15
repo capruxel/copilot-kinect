@@ -117,6 +117,7 @@ class RecognitionPipeline:
         self._last_idle_status_at = 0.0
         self._last_source_frame_seq = -1
         self._last_source_frame_timestamp = 0.0
+        self._stream_frame_size = (0, 0)
         self._announcements = []
         self._current_course = {
             "course_id": "",
@@ -818,20 +819,10 @@ class RecognitionPipeline:
             pass
 
     def _get_stream_payload_and_token(self, kind):
-        with self._frame_lock:
-            in_attendance_mode = bool(self._attendance_mode)
-            render_seq = int(self._render_seq)
-            color_payload = self._annotated_jpeg
-            depth_payload = self._annotated_depth_jpeg
-            has_annotated_pair = in_attendance_mode and color_payload is not None and depth_payload is not None
-            if has_annotated_pair:
-                payload = color_payload if kind == "color" else depth_payload
-                return payload, ("attendance", render_seq)
-
-        fallback_payload = self.kinect_service.get_latest_jpeg(kind)
+        payload = self.kinect_service.get_latest_jpeg(kind)
         marker = self.kinect_service.get_latest_frame_marker()
-        fallback_seq = int(marker.get("frame_seq") or 0)
-        return fallback_payload, ("raw", fallback_seq)
+        frame_seq = int(marker.get("frame_seq") or 0)
+        return payload, ("raw", frame_seq)
 
     def _encode_frame(self, frame):
         cv2, _ = self._get_cv_modules()
@@ -1236,6 +1227,7 @@ class RecognitionPipeline:
                     "presence_time": now - person.first_seen,
                     "confirm_status": person.confirm_status,
                     "confirm_message": person.confirm_message,
+                    "stream_bbox": self._normalize_stream_bbox(person.bbox),
                 }
             )
         return payload
@@ -1296,6 +1288,7 @@ class RecognitionPipeline:
                     else [],
                     "last_similarity": person.last_similarity,
                     "current_tracking_id": person.current_tracking_id,
+                    "stream_bbox": self._normalize_stream_bbox(person.bbox),
                     "session_visible": person.user_id in self._session_confirmed_ids,
                     "classroom_metrics": self._metric_engine.get_user_metrics(person.user_id)
                     if include_metrics_for_person
@@ -1303,6 +1296,17 @@ class RecognitionPipeline:
                 }
             )
         return payload
+
+    def _normalize_stream_bbox(self, bbox):
+        width, height = self._stream_frame_size
+        if bbox is None or width <= 0 or height <= 0:
+            return None
+        return [
+            max(0.0, min(1.0, float(bbox[0]) / width)),
+            max(0.0, min(1.0, float(bbox[1]) / height)),
+            max(0.0, min(1.0, float(bbox[2]) / width)),
+            max(0.0, min(1.0, float(bbox[3]) / height)),
+        ]
 
     def _promote_temporary_to_confirmed_locked(self, temp_id, match, now):
         temp_person = self._temporary_people.get(temp_id)
@@ -1905,10 +1909,9 @@ class RecognitionPipeline:
                     include_presence_points=False,
                     include_metrics=False,
                 )
-                encoded_frame = self._encode_frame(frame)
                 self._last_render_at = 0.0
                 with self._frame_lock:
-                    self._annotated_jpeg = encoded_frame
+                    self._annotated_jpeg = None
                     self._annotated_depth_jpeg = None
                     self._render_seq = 0
                 self._detector._distance_smooth_cache = {}
@@ -1929,29 +1932,11 @@ class RecognitionPipeline:
                 )
             return
 
-        _new_color = None
-        _new_depth = None
         with self._lock:
+            self._stream_frame_size = (int(frame.shape[1]), int(frame.shape[0]))
             self._match_detections_locked(person_boxes, now)
             self._update_classroom_metrics_locked(frame.shape, depth_frame, now)
             self._update_summary_locked(now)
-            should_render = self._annotated_jpeg is None or (now - self._last_render_at) >= self.RENDER_INTERVAL
-            if should_render:
-                annotated = self._annotate_frame_locked(frame)
-                _new_color = self._encode_frame(annotated)
-                depth_annotated = self._annotate_depth_frame_locked(
-                    depth_visual_frame,
-                    depth_frame,
-                    frame.shape,
-                )
-                _new_depth = self._encode_frame(depth_annotated) if depth_annotated is not None else None
-                self._last_render_at = now
-
-        if should_render:
-            with self._frame_lock:
-                self._annotated_jpeg = _new_color
-                self._annotated_depth_jpeg = _new_depth
-                self._render_seq += 1
 
     def _loop(self):
         while self._running:
