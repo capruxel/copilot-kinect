@@ -10,20 +10,37 @@ PORT = 8765
 HEARTBEAT_INTERVAL = 10
 FALLBACK_TIMEOUT = 10
 RECONNECT_DELAY_MS = 3000
+CONNECT_TIMEOUT_MS = 5000
 
 _last_recv = time.time()
 
 
 def connect():
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    s.settimeout(5)
+    s.setblocking(False)
     try:
         s.connect((HOST, PORT))
-        print("TCP connected to", HOST)
-        return s
-    except Exception as e:
-        print("TCP connect failed:", e)
-        return None
+    except OSError:
+        pass
+
+    poller = select.poll()
+    poller.register(s, select.POLLOUT)
+    deadline = time.ticks_add(time.ticks_ms(), CONNECT_TIMEOUT_MS)
+    while time.ticks_diff(deadline, time.ticks_ms()) > 0:
+        breathe_all()
+        events = poller.poll(100)
+        if not events:
+            continue
+        event = events[0][1]
+        if event & select.POLLOUT and not event & (select.POLLERR | select.POLLHUP):
+            s.setblocking(True)
+            print("TCP connected to", HOST)
+            return s
+        break
+
+    print("TCP connect failed")
+    s.close()
+    return None
 
 
 def send_json(sock, msg):
