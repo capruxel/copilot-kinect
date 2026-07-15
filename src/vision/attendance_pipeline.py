@@ -92,7 +92,7 @@ class RecognitionPipeline:
         self._font_cache = {}
         self._metric_engine = PoseDepthMetricEngine()
         self._region_engine = RegionFocusEngine(
-            num_regions=_env_int("LED_STRIP_NUM_REGIONS", 5),
+            num_regions=_env_int("LED_STRIP_NUM_REGIONS", 3),
             red_threshold=_env_float("LED_STRIP_RED_THRESHOLD", 30.0),
             green_threshold=_env_float("LED_STRIP_GREEN_THRESHOLD", 60.0),
         )

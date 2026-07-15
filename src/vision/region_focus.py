@@ -51,7 +51,7 @@ def compute_region_colors(regions, red_threshold=30.0, green_threshold=60.0):
 
 
 class RegionFocusEngine:
-    def __init__(self, num_regions=5, red_threshold=30.0, green_threshold=60.0):
+    def __init__(self, num_regions=3, red_threshold=30.0, green_threshold=60.0):
         self.num_regions = num_regions
         self.red_threshold = red_threshold
         self.green_threshold = green_threshold
