@@ -10,6 +10,7 @@
         const alertPanel = document.getElementById('alert-panel');
         const colorImage = document.getElementById('kinect-color-image');
         const depthImage = document.getElementById('kinect-depth-image');
+        const colorDetectionOverlay = document.getElementById('color-detection-overlay');
         const studentTrackList = document.getElementById('student-track-list');
         const coursePickerShell = document.getElementById('course-picker-shell');
         const courseSelect = document.getElementById('course-select');
@@ -118,6 +119,7 @@
         let selectedCourseId = '';
         let selectedCourseName = '';
         let lastSyncedCourseKey = '';
+        let latestDetectionPeople = [];
         const initialTrainingStudents = window.__DATA__.trainingStudents;
         const PROFILE_MENU_CLOSE_DELAY_MS = 220;
         const COURSE_STORAGE_KEY = `attendance_course_${currentUserAccount || 'default'}`;
@@ -1958,6 +1960,7 @@
             const presentConfirmedPeople = confirmedPeople.filter(isPresentPerson);
             const presentConfirmedCount = presentConfirmedPeople.length;
             personCountPill.textContent = attendanceMode ? String(temporaryPeople.length + presentConfirmedCount) : '0';
+            renderDetectionOverlay(temporaryPeople, presentConfirmedPeople);
             renderStudentRows(temporaryPeople, confirmedPeople);
 
             if (currentView === 'student' && selectedStudentId) {
@@ -1969,6 +1972,53 @@
                 }
             }
             syncAttendanceButtonAvailability();
+        }
+
+        function renderDetectionOverlay(temporaryPeople, confirmedPeople) {
+            latestDetectionPeople = [
+                ...temporaryPeople.map((person) => ({
+                    bbox: person.stream_bbox,
+                    label: person.display_name || '未確認',
+                    confirmed: false,
+                })),
+                ...confirmedPeople.map((person) => ({
+                    bbox: person.stream_bbox,
+                    label: person.display_name || person.name || '已確認',
+                    confirmed: true,
+                })),
+            ].filter((person) => Array.isArray(person.bbox) && person.bbox.length === 4);
+            drawDetectionOverlay();
+        }
+
+        function drawDetectionOverlay() {
+            colorDetectionOverlay.replaceChildren();
+            if (!attendanceMode || !colorImage.naturalWidth || !colorImage.naturalHeight) {
+                return;
+            }
+
+            const displayWidth = colorImage.clientWidth;
+            const displayHeight = colorImage.clientHeight;
+            const scale = Math.max(displayWidth / colorImage.naturalWidth, displayHeight / colorImage.naturalHeight);
+            const renderedWidth = colorImage.naturalWidth * scale;
+            const renderedHeight = colorImage.naturalHeight * scale;
+            const offsetX = (displayWidth - renderedWidth) / 2;
+            const offsetY = (displayHeight - renderedHeight) / 2;
+
+            latestDetectionPeople.forEach((person) => {
+                const [x1, y1, x2, y2] = person.bbox;
+                const box = document.createElement('div');
+                box.className = `detection-box${person.confirmed ? ' is-confirmed' : ''}`;
+                box.style.left = `${offsetX + x1 * renderedWidth}px`;
+                box.style.top = `${offsetY + y1 * renderedHeight}px`;
+                box.style.width = `${Math.max(0, (x2 - x1) * renderedWidth)}px`;
+                box.style.height = `${Math.max(0, (y2 - y1) * renderedHeight)}px`;
+
+                const label = document.createElement('span');
+                label.className = 'detection-box-label';
+                label.textContent = person.label;
+                box.appendChild(label);
+                colorDetectionOverlay.appendChild(box);
+            });
         }
 
         const ATTENDANCE_STATUS_POLL_IDLE_MS = 1500;
@@ -2329,6 +2379,8 @@
 
         toggleKinectButton.addEventListener('click', toggleKinect);
         attendanceButton.addEventListener('click', toggleAttendance);
+        colorImage.addEventListener('load', drawDetectionOverlay);
+        new ResizeObserver(drawDetectionOverlay).observe(colorImage);
         updateTrainingRegistry(Array.isArray(initialTrainingStudents) ? initialTrainingStudents : []);
         studentTrackList.addEventListener('click', (event) => {
             const confirmButton = event.target.closest('[data-temp-id]');

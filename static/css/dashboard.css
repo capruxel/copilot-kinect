@@ -2258,6 +2258,8 @@
 
         .feed-frame {
             position: relative;
+            overflow: hidden;
+            border-radius: 18px;
         }
 
         .feed-frame::after {
@@ -2277,6 +2279,45 @@
             border: 1px solid rgba(132, 149, 191, 0.12);
             object-fit: cover;
             background: #0d1120;
+        }
+
+        .detection-overlay {
+            position: absolute;
+            z-index: 2;
+            inset: 0;
+            pointer-events: none;
+        }
+
+        .detection-box {
+            position: absolute;
+            border: 2px solid #ff8f3d;
+            border-radius: 8px;
+            box-shadow: 0 0 0 1px rgba(13, 17, 32, 0.72), inset 0 0 0 1px rgba(255, 255, 255, 0.18);
+        }
+
+        .detection-box.is-confirmed {
+            border-color: #1fc7d4;
+        }
+
+        .detection-box-label {
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            max-width: 180px;
+            padding: 4px 8px;
+            overflow: hidden;
+            border-radius: 7px 0 7px 0;
+            background: #ff8f3d;
+            color: #111522;
+            font-size: 0.72rem;
+            font-weight: 800;
+            line-height: 1.2;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .detection-box.is-confirmed .detection-box-label {
+            background: #1fc7d4;
         }
 
         .feed-label {
