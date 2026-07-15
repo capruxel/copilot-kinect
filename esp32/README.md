@@ -1,10 +1,26 @@
-# ESP32 LED Strip Firmware
+# ESP32 RGB LED Firmware
 
 ## Hardware
 
 - ESP32 32E (WROOM)
-- 5 x WS2812B LED strips, 30 LEDs each
-- GPIO pins: 13, 12, 14, 27, 33
+- 3 x common-cathode, 4-pin RGB LEDs for the front, middle, and back regions
+- Recommended: 9 x 220-330 ohm current-limiting resistors, one per color channel
+- Temporary option: 3 x 220-330 ohm resistors, one between each LED's common cathode and GND
+
+| Region | Red | Green | Blue |
+| ------ | --- | ----- | ---- |
+| Front  | GPIO 25 | GPIO 26 | GPIO 27 |
+| Middle | GPIO 32 | GPIO 33 | GPIO 14 |
+| Back   | GPIO 18 | GPIO 19 | GPIO 21 |
+
+Connect each RGB pin to its GPIO through a current-limiting resistor. Connect
+each LED's common-cathode pin to ESP32 GND.
+
+With only three resistors, keep the R/G/B pins separate and place one resistor
+between each LED's common cathode and GND. This temporary wiring is suitable
+for single-color states; the firmware therefore uses only blue for fallback.
+
+Detailed wiring guide: [`docs/esp32_common_cathode_rgb_led_wiring.md`](../docs/esp32_common_cathode_rgb_led_wiring.md)
 
 ## Setup
 
@@ -13,14 +29,9 @@
    ```bash
    pip install mpremote
    ```
-3. Copy files to the board:
-   ```bash
-   mpremote cp boot.py :boot.py
-   mpremote cp strip.py :strip.py
-   mpremote cp main.py :main.py
-   mpremote soft-reset
-   ```
-   Or in one shot:
+3. Edit `boot.py` and replace `YOUR_WIFI_SSID` and `YOUR_WIFI_PASSWORD`.
+4. Edit `main.py` and replace `HOST` with the Kinect machine IP.
+5. Copy the files to the board:
    ```bash
    mpremote cp boot.py :boot.py + cp strip.py :strip.py + cp main.py :main.py + soft-reset
    ```
@@ -28,22 +39,30 @@
    ```bash
    mpremote connect /dev/cu.usbserial-10 cp boot.py :boot.py + cp strip.py :strip.py + cp main.py :main.py + soft-reset
    ```
-4. Edit `boot.py` — replace `YOUR_WIFI_SSID` and `YOUR_WIFI_PASSWORD`
-5. Edit `main.py` — replace `HOST` with the Kinect machine IP
 
 ## Protocol
 
-NDJSON over TCP (port 8765). ESP32 connects as client, sends `{"t":"hello"}` on connect.
+NDJSON over TCP (port 8765). ESP32 connects as the client and sends
+`{"t":"hello"}` on connection.
 
-Host → ESP32:
-- `{"t":"state","regions":[{"region":0,"color":"g","median":85.0,"count":3},...]}`
+Host to ESP32:
 
-ESP32 → Host:
+```json
+{"t":"state","regions":[{"region":0,"color":"g","median":85.0,"count":3}]}
+```
+
+- Region `0`: front
+- Region `1`: middle
+- Region `2`: back
+- Colors: `"g"` (green), `"r"` (red), `"b"` (blue), `"off"`
+
+ESP32 to host:
+
 - `{"t":"hello"}`
-- `{"t":"pong"}` (every 10s)
-
-Colors: `"g"` (green), `"r"` (red), `"b"` (blue), `"off"` (no lights).
+- `{"t":"pong"}` every 10 seconds
 
 ## Fallback
 
-If no data received for 10 seconds, all strips switch to rainbow pattern.
+If no data is received for 10 seconds, all three LEDs display a synchronized
+blue breathing effect until data resumes. The same effect runs between TCP
+reconnection attempts.
